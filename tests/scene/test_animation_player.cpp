@@ -152,7 +152,7 @@ TEST_CASE("[AnimationPlayer] Blend time is directional") {
 	memdelete(player);
 }
 
-TEST_CASE("[AnimationPlayer] Default blend time used as fallback") {
+TEST_CASE("[SceneTree][AnimationPlayer] Default blend time used as fallback") {
 	AnimationPlayer *player = memnew(AnimationPlayer);
 	player->set_auto_capture(false);
 	setup_two_animations(player, "idle", 1.0, "walk", 1.0);

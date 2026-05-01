@@ -41,6 +41,8 @@ TEST_FORCE_LINK(test_animation_player)
 
 namespace TestAnimationPlayer {
 
+static constexpr double DELTA = 1.0 / 60.0; // Fixed timestep used for all timing tests.
+
 // Helper: create a simple value animation of a given length.
 static Ref<Animation> make_value_animation(double p_length, Animation::LoopMode p_loop = Animation::LOOP_NONE) {
 	Ref<Animation> anim = memnew(Animation);
@@ -218,7 +220,7 @@ TEST_CASE("[SceneTree][AnimationPlayer] Pause keeps current animation but stops 
 	SceneTree::get_singleton()->get_root()->add_child(player);
 
 	player->play("test");
-	player->advance(0.3);
+	player->advance(DELTA);
 	double pos_before = player->get_current_animation_position();
 	player->pause();
 
@@ -239,7 +241,7 @@ TEST_CASE("[SceneTree][AnimationPlayer] Stop with keep_state preserves position"
 
 	player->play("test");
 	player->advance(0.0);
-	player->advance(0.4);
+	player->advance(DELTA * 24); // 24 frames
 
 	player->stop(true);
 	CHECK_FALSE(player->is_playing());
@@ -283,11 +285,11 @@ TEST_CASE("[SceneTree][AnimationPlayer] Advance moves position forward") {
 
 	player->play("anim");
 	player->advance(0.0);
-	player->advance(0.5);
-	CHECK(player->get_current_animation_position() == doctest::Approx(0.5));
+	player->advance(DELTA * 30); // 30 frames
+	CHECK(player->get_current_animation_position() == doctest::Approx(DELTA * 30));
 
-	player->advance(0.3);
-	CHECK(player->get_current_animation_position() == doctest::Approx(0.8));
+	player->advance(DELTA * 18); // 18 more frames
+	CHECK(player->get_current_animation_position() == doctest::Approx(DELTA * 48));
 
 	SceneTree::get_singleton()->get_root()->remove_child(player);
 	memdelete(player);
@@ -304,8 +306,8 @@ TEST_CASE("[SceneTree][AnimationPlayer] Advance with speed_scale doubles rate") 
 	player->set_speed_scale(2.0f);
 	player->play("anim");
 	player->advance(0.0);
-	player->advance(0.5);
-	CHECK(player->get_current_animation_position() == doctest::Approx(1.0));
+	player->advance(DELTA * 30); // 30 frames at 2x speed = 60 frames worth of movement
+	CHECK(player->get_current_animation_position() == doctest::Approx(DELTA * 60));
 
 	SceneTree::get_singleton()->get_root()->remove_child(player);
 	memdelete(player);
@@ -438,7 +440,7 @@ TEST_CASE("[SceneTree][AnimationPlayer] animation_finished signal fires at end o
 	AnimationPlayer *player = memnew(AnimationPlayer);
 	player->set_auto_capture(false);
 	Ref<AnimationLibrary> lib = memnew(AnimationLibrary);
-	lib->add_animation("short", make_value_animation(0.5));
+	lib->add_animation("short", make_value_animation(DELTA * 30)); // 30 frames long
 	player->add_animation_library("", lib);
 	SceneTree::get_singleton()->get_root()->add_child(player);
 
@@ -447,8 +449,8 @@ TEST_CASE("[SceneTree][AnimationPlayer] animation_finished signal fires at end o
 	player->play("short");
 	player->advance(0.0);
 
-	// Advance past the animation length.
-	player->advance(1.0);
+	// Advance past the animation length (60 frames > 30 frame animation).
+	player->advance(DELTA * 60);
 
 	Array expected_args;
 	{
@@ -546,8 +548,8 @@ TEST_CASE("[SceneTree][AnimationPlayer] Play backwards moves position toward sta
 
 	CHECK(player->get_current_animation_position() == doctest::Approx(2.0));
 
-	player->advance(0.5);
-	CHECK(player->get_current_animation_position() == doctest::Approx(1.5));
+	player->advance(DELTA * 30); // 30 frames backwards
+	CHECK(player->get_current_animation_position() == doctest::Approx(2.0 - DELTA * 30));
 
 	SceneTree::get_singleton()->get_root()->remove_child(player);
 	memdelete(player);
@@ -565,7 +567,7 @@ TEST_CASE("[SceneTree][AnimationPlayer] Switching animations with blend time cre
 
 	player->play("anim_a");
 	player->advance(0.0);
-	player->advance(0.3);
+	player->advance(DELTA * 18); // 18 frames into anim_a
 
 	player->play("anim_b");
 	CHECK(player->is_playing());
@@ -589,9 +591,9 @@ TEST_CASE("[SceneTree][AnimationPlayer] Rapid animation switches with default bl
 
 	player->play("a");
 	player->advance(0.0);
-	player->advance(0.1);
+	player->advance(DELTA * 6); // 6 frames
 	player->play("b");
-	player->advance(0.05);
+	player->advance(DELTA * 3); // 3 frames
 	player->play("c");
 
 	CHECK(player->is_playing());
@@ -639,7 +641,7 @@ TEST_CASE("[SceneTree][AnimationPlayer] Playing the same animation again does no
 
 	player->play("test");
 	player->advance(0.0);
-	player->advance(0.8);
+	player->advance(DELTA * 48); // 48 frames
 	double pos_before = player->get_current_animation_position();
 
 	// Calling play again with same name while already playing should not restart.
@@ -672,10 +674,10 @@ TEST_CASE("[SceneTree][AnimationPlayer] Looping animation continues past length"
 
 	player->play("loop");
 	player->advance(0.0);
-	player->advance(1.5);
+	player->advance(DELTA * 90); // 90 frames = 1.5s at 60fps, wraps a 1.0s animation
 
 	CHECK(player->is_playing());
-	CHECK(player->get_current_animation_position() == doctest::Approx(0.5));
+	CHECK(player->get_current_animation_position() == doctest::Approx(DELTA * 90 - 1.0));
 
 	SceneTree::get_singleton()->get_root()->remove_child(player);
 	memdelete(player);
@@ -691,7 +693,7 @@ TEST_CASE("[SceneTree][AnimationPlayer] Non-looping animation clamps at end") {
 
 	player->play("once");
 	player->advance(0.0);
-	player->advance(2.0);
+	player->advance(DELTA * 120); // 120 frames = 2.0s, exceeds 1.0s animation
 
 	CHECK(player->get_current_animation_position() == doctest::Approx(1.0));
 	CHECK_FALSE(player->is_playing());
@@ -710,7 +712,7 @@ TEST_CASE("[SceneTree][AnimationPlayer] Zero-length advance does not move positi
 
 	player->play("anim");
 	player->advance(0.0);
-	player->advance(0.5);
+	player->advance(DELTA * 30); // 30 frames
 	double pos = player->get_current_animation_position();
 
 	player->advance(0.0);
@@ -729,7 +731,7 @@ TEST_CASE("[SceneTree][AnimationPlayer] Queued animation plays after first finis
 	player->play("first");
 	player->queue("second");
 	player->advance(0.0);
-	player->advance(1.0);
+	player->advance(DELTA * 60); // 60 frames = 1.0s, exceeds 0.5s first animation
 
 	CHECK(player->is_playing());
 	CHECK(player->get_current_animation() == StringName("second"));
@@ -748,8 +750,8 @@ TEST_CASE("[SceneTree][AnimationPlayer] Pingpong loop reverses direction") {
 
 	player->play("pp");
 	player->advance(0.0);
-	// Advance past the end to trigger pingpong.
-	player->advance(1.5);
+	// Advance past the end to trigger pingpong (90 frames = 1.5s).
+	player->advance(DELTA * 90);
 
 	CHECK(player->is_playing());
 	// Should be somewhere between 0 and 1 after bouncing.
@@ -773,11 +775,11 @@ TEST_CASE("[SceneTree][AnimationPlayer] Multiple play calls with blend accumulat
 
 	player->play("a");
 	player->advance(0.0);
-	player->advance(0.1);
+	player->advance(DELTA * 6); // 6 frames
 
 	// Switch to b with explicit blend.
 	player->play("b", 0.3);
-	player->advance(0.1);
+	player->advance(DELTA * 6); // 6 frames
 
 	// Immediately switch to c with explicit blend.
 	player->play("c", 0.3);

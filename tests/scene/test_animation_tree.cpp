@@ -44,6 +44,8 @@ TEST_FORCE_LINK(test_animation_tree)
 
 namespace TestAnimationTree {
 
+static constexpr double DELTA = 1.0 / 60.0; // Fixed timestep used for all timing tests.
+
 static Ref<Animation> make_value_animation(double p_length, Animation::LoopMode p_loop = Animation::LOOP_NONE) {
 	Ref<Animation> anim = memnew(Animation);
 	anim->set_length(p_length);
@@ -821,7 +823,7 @@ TEST_CASE("[SceneTree][AnimationTree] Manual advance with simple blend tree") {
 
 	s.tree->set_callback_mode_process(AnimationMixer::ANIMATION_CALLBACK_MODE_PROCESS_MANUAL);
 	s.tree->advance(0.0);
-	s.tree->advance(0.5);
+	s.tree->advance(DELTA * 30); // 30 frames
 
 	cleanup_tree_setup(s);
 }
@@ -834,7 +836,7 @@ TEST_CASE("[SceneTree][AnimationTree] Advance processes without crash when blend
 
 	s.tree->set_callback_mode_process(AnimationMixer::ANIMATION_CALLBACK_MODE_PROCESS_MANUAL);
 	s.tree->advance(0.0);
-	s.tree->advance(0.1);
+	s.tree->advance(DELTA); // 1 frame
 
 	cleanup_tree_setup(s);
 }
@@ -871,13 +873,13 @@ TEST_CASE("[SceneTree][AnimationTree] Blend2 with two animations processes witho
 	// Process several frames with different blend amounts.
 	s.tree->set("parameters/blend/blend_amount", 0.0);
 	s.tree->advance(0.0);
-	s.tree->advance(0.1);
+	s.tree->advance(DELTA * 6); // 6 frames
 
 	s.tree->set("parameters/blend/blend_amount", 0.5);
-	s.tree->advance(0.1);
+	s.tree->advance(DELTA * 6); // 6 frames
 
 	s.tree->set("parameters/blend/blend_amount", 1.0);
-	s.tree->advance(0.1);
+	s.tree->advance(DELTA * 6); // 6 frames
 
 	cleanup_tree_setup(s);
 }
@@ -906,7 +908,7 @@ TEST_CASE("[SceneTree][AnimationTree] TimeScale node scales playback rate") {
 	s.tree->set("parameters/timescale/scale", 2.0);
 
 	s.tree->advance(0.0);
-	s.tree->advance(0.5);
+	s.tree->advance(DELTA * 30); // 30 frames at 2x = 60 frames worth
 
 	cleanup_tree_setup(s);
 }

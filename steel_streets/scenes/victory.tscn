@@ -1,0 +1,53 @@
+[gd_scene load_steps=4 format=3 uid="uid://b0victory00001"]
+
+[ext_resource type="Script" path="res://scripts/victory.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/victory.png" id="2_main"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ui/press_any_key.png" id="3_press"]
+
+[node name="Victory" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("1_script")
+
+[node name="Bg" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.878, 0.973, 0.816, 1.0)
+mouse_filter = 2
+
+[node name="Root" type="Control" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="Main" type="TextureRect" parent="Root"]
+texture = ExtResource("2_main")
+offset_left = 39.0
+offset_top = 48.0
+offset_right = 122.0
+offset_bottom = 55.0
+expand_mode = 0
+stretch_mode = 5
+
+[node name="Score" type="Label" parent="Root"]
+offset_left = 32.0
+offset_top = 70.0
+offset_right = 128.0
+offset_bottom = 82.0
+text = "FINAL SCORE 00000"
+theme_override_colors/font_color = Color(0.031, 0.094, 0.125, 1.0)
+theme_override_font_sizes/font_size = 8
+horizontal_alignment = 1
+
+[node name="Press" type="TextureRect" parent="Root"]
+texture = ExtResource("3_press")
+offset_left = 41.0
+offset_top = 116.0
+offset_right = 118.0
+offset_bottom = 123.0
+expand_mode = 0
+stretch_mode = 5

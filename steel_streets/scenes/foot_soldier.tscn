@@ -1,0 +1,43 @@
+[gd_scene load_steps=5 format=3 uid="uid://b0foot00001"]
+
+[ext_resource type="Script" path="res://scripts/foot_soldier.gd" id="1_script"]
+[ext_resource type="AudioStream" path="res://assets/audio/hit.wav" id="2_hit"]
+
+[sub_resource type="RectangleShape2D" id="rs_body"]
+size = Vector2(10, 14)
+
+[sub_resource type="RectangleShape2D" id="rs_hb"]
+size = Vector2(12, 14)
+
+[node name="FootSoldier" type="CharacterBody2D"]
+collision_layer = 8
+collision_mask = 1
+script = ExtResource("1_script")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("rs_body")
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 4
+monitoring = true
+monitorable = true
+
+[node name="Shape" type="CollisionShape2D" parent="Hurtbox"]
+shape = SubResource("rs_hb")
+
+[node name="Hitbox" type="Area2D" parent="."]
+collision_layer = 16
+collision_mask = 2
+monitoring = true
+monitorable = true
+
+[node name="Shape" type="CollisionShape2D" parent="Hitbox"]
+shape = SubResource("rs_hb")
+
+[node name="SfxHit" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_hit")
+volume_db = -8.0

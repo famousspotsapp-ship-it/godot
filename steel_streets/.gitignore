@@ -1,0 +1,11 @@
+# Godot 4+ specific ignores
+.godot/
+.import/
+
+# Imported translations (automatically generated from CSV files)
+*.translation
+
+# System/tool files
+.DS_Store
+*.tmp
+__pycache__/

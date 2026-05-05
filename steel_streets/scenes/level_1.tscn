@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://b0level1000001"]
+
+[ext_resource type="Script" path="res://scripts/level_1.gd" id="1_script"]
+[ext_resource type="AudioStream" path="res://assets/audio/bgm.wav" id="2_bgm"]
+
+[node name="Level1" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="TileMap" type="TileMap" parent="."]
+format = 2
+
+[node name="Entities" type="Node2D" parent="."]
+
+[node name="Bgm" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_bgm")
+volume_db = -16.0
+autoplay = false

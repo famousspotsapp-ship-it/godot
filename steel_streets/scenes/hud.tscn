@@ -1,0 +1,76 @@
+[gd_scene load_steps=2 format=3 uid="uid://b0hud00000001"]
+
+[ext_resource type="Script" path="res://scripts/hud.gd" id="1_script"]
+
+[node name="HUD" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1_script")
+
+[node name="Root" type="Control" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 0.0
+offset_bottom = 0.0
+mouse_filter = 2
+
+[node name="Top" type="HBoxContainer" parent="Root"]
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 158.0
+offset_bottom = 14.0
+theme_override_constants/separation = 4
+mouse_filter = 2
+
+[node name="Hearts" type="HBoxContainer" parent="Root/Top"]
+theme_override_constants/separation = 1
+size_flags_horizontal = 0
+mouse_filter = 2
+
+[node name="Stats" type="HBoxContainer" parent="Root/Top"]
+theme_override_constants/separation = 4
+size_flags_horizontal = 3
+alignment = 2
+mouse_filter = 2
+
+[node name="Lives" type="Label" parent="Root/Top/Stats"]
+text = "x3"
+theme_override_colors/font_color = Color(0.031, 0.094, 0.125, 1.0)
+theme_override_font_sizes/font_size = 8
+mouse_filter = 2
+
+[node name="Score" type="Label" parent="Root/Top/Stats"]
+text = "00000"
+theme_override_colors/font_color = Color(0.031, 0.094, 0.125, 1.0)
+theme_override_font_sizes/font_size = 8
+mouse_filter = 2
+
+[node name="BossBar" type="Control" parent="Root"]
+visible = false
+offset_left = 48.0
+offset_top = 130.0
+offset_right = 112.0
+offset_bottom = 142.0
+mouse_filter = 2
+
+[node name="Bar" type="ColorRect" parent="Root/BossBar"]
+offset_right = 64.0
+offset_bottom = 4.0
+color = Color(0.031, 0.094, 0.125, 1.0)
+mouse_filter = 2
+
+[node name="Fill" type="ColorRect" parent="Root/BossBar/Bar"]
+offset_right = 64.0
+offset_bottom = 4.0
+color = Color(0.533, 0.752, 0.439, 1.0)
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="Root/BossBar"]
+offset_left = 22.0
+offset_top = 4.0
+offset_right = 64.0
+offset_bottom = 12.0
+text = "BOSS"
+theme_override_colors/font_color = Color(0.031, 0.094, 0.125, 1.0)
+theme_override_font_sizes/font_size = 8
+mouse_filter = 2

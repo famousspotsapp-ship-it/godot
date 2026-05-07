@@ -37,6 +37,7 @@ green palette:
 steel_streets/
 ├── project.godot          # input map, autoload, viewport scaling
 ├── icon.svg
+├── ARCHITECTURE.md        # authoritative engineering reference (read this!)
 ├── scenes/                # title, splash, level, game over, victory + entity scenes
 ├── scripts/               # GDScript files (autoload, player, enemies, HUD, ...)
 ├── assets/
@@ -45,6 +46,10 @@ steel_streets/
 └── tools/
     └── gen_assets.py      # regenerates every PNG/WAV from code (Pillow + wave)
 ```
+
+For a deep dive into scenes, scripts, signals, physics layers, the boss
+state machine, and the asset pipeline, see
+[`ARCHITECTURE.md`](./ARCHITECTURE.md).
 
 All sprites and audio are generated programmatically by
 `tools/gen_assets.py` so the entire art and sound pipeline is reproducible:

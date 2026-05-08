@@ -54,22 +54,26 @@ gameplay/look:
 | `display/window/stretch/aspect` | `keep` | Letterboxes to preserve the GB aspect ratio. |
 | `rendering/textures/canvas_textures/default_texture_filter` | `0` | Nearest-neighbour filtering globally — no per-import overrides needed. |
 
-**Input map** (`[input]` section). Six actions, each bound to keyboard,
+**Input map** (`[input]` section). Seven actions, each bound to keyboard,
 arrow/WASD, and a gamepad equivalent:
 
-| Action | Keys | Gamepad |
-| --- | --- | --- |
-| `move_left` | `A`, `←` | left stick / d-pad left |
-| `move_right` | `D`, `→` | left stick / d-pad right |
-| `jump` | `Space`, `W` | A button |
-| `attack` | `Z`, `J` | X button |
-| `climb_up` | `W`, `↑` | d-pad up |
-| `climb_down` | `S`, `↓` | d-pad down |
+| Action | Keys | Gamepad | Used by |
+| --- | --- | --- | --- |
+| `move_left` | `A`, `←` | left stick / d-pad left | `player.gd` (`Input.get_axis`) |
+| `move_right` | `D`, `→` | left stick / d-pad right | `player.gd` (`Input.get_axis`) |
+| `jump` | `Space`, `W` | A button | `player.gd` |
+| `attack` | `Z`, `J` | X button | `player.gd` |
+| `climb_up` | `W`, `↑` | d-pad up | `player.gd` (ladder mode) |
+| `climb_down` | `S`, `↓` | d-pad down | `player.gd` (ladder mode) |
+| `start` | `Enter`, `Space` | Start | (reserved — title/splash/game-over use raw `_input`) |
 
 Note: `move_up` / `move_down` do **not** exist as actions. Vertical movement
 on ladders uses the dedicated `climb_up` / `climb_down` actions, which
 deliberately overlap with `jump` (`W`) so the player only needs three buttons
-in the worst case.
+in the worst case. The `start` action is wired in `project.godot` for future
+use — every menu screen currently advances on **any** `InputEventKey`,
+`InputEventJoypadButton`, or `InputEventMouseButton` press, so `start` is not
+required to dismiss the title or game-over screens.
 
 ---
 
@@ -189,10 +193,16 @@ animation, invincibility flash).
 ### Attack window
 
 `AttackHitbox.monitoring` is only enabled while
-`attack_timer ∈ (0, ATTACK_TIME * 0.75)` — i.e. roughly the **middle 25 %** of
-the swing. The hitbox is positioned at `±10 px` on the X axis based on
-`facing`. This is the contract `enemy_base.gd` relies on when its Hurtbox
-fires `area_entered` for the `player_attack` group.
+`attack_timer ∈ (0, ATTACK_TIME * 0.75)`. Because `attack_timer` counts
+**down** from `ATTACK_TIME = 0.30` to 0, this corresponds to the **last 75 %**
+of the swing window — there is a `0.075 s` windup at the start during which
+the hitbox is still disabled, and then the hitbox stays active until
+`attack_timer` reaches 0. After that, `cooldown_timer` (= `ATTACK_TIME +
+ATTACK_COOLDOWN = 0.45 s`) blocks re-triggering an attack.
+
+The hitbox is positioned at `±10 px` on the X axis based on `facing`. This is
+the contract `enemy_base.gd` relies on when its Hurtbox fires `area_entered`
+for the `player_attack` group.
 
 ### Ladders
 
@@ -444,19 +454,206 @@ sprites does not require touching their `.import` files.
 
 ---
 
-## 14. What does *not* exist (anti-knowledge)
+## 14. Group memberships and naming conventions
+
+The codebase uses Godot **groups** as the primary cross-entity contract.
+When adding new entities, use these exact strings — the rest of the project
+relies on them.
+
+| Group | Members (auto-joined in `_ready`) | Consumers |
+| --- | --- | --- |
+| `player` | `Player` (`player.gd`) | foot soldier chase, shuriken aim, projectile damage, spike damage, level boss-defeat hookup |
+| `player_attack` | `Player/AttackHitbox` (`Area2D`) | `enemy_base._on_hurtbox_area_entered`, `question_block._on_area_entered` |
+| `enemy` | All enemies via `enemy_base._ready` | (no current readers — group is reserved for future expansion) |
+| `boss` | Boss only (`boss._ready`) | (no current readers — group is reserved for future expansion) |
+| `ladder` | Each `Ladder_*` Area2D in `level_1._make_ladder` | (no current readers — group is reserved for future expansion) |
+
+**Magic node names that scripts assume:**
+
+- `Player/Sprite` (`AnimatedSprite2D`), `Player/AttackHitbox` (`Area2D`),
+  `Player/AttackHitbox/Shape` (`CollisionShape2D`),
+  `Player/SfxJump` / `SfxAttack` / `SfxHurt` (`AudioStreamPlayer`).
+- All enemies: `Sprite`, `Hurtbox`, `Hitbox`, `SfxHit` — wired with
+  `has_node` guards in `enemy_base.gd`, so additional enemies with subset
+  layouts still work.
+- HUD: `Root/Top/Hearts` (`HBoxContainer`), `Root/Top/Stats/Lives`,
+  `Root/Top/Stats/Score`, `Root/BossBar`, `Root/BossBar/Bar/Fill`,
+  `Root/BossBar/Label`. Renaming any of these breaks the HUD.
+- Level: `TileMap` (built procedurally), `Entities` (`Node2D` container),
+  `Bgm` (`AudioStreamPlayer`).
+
+**One quirky convention to be aware of:** `question_block.gd._consume()`
+gates the `heal()` call on `player.has_method("get_attack_damage")`. This is
+*not* a damage check — it's used as a duck-typed "is this actually a
+player?" guard. If you change the player API, update that check too.
+
+---
+
+## 15. Asset–script frame contract
+
+Every `FRAMES_SPEC` array inside a GDScript file (`player.gd`, `boss.gd`,
+`foot_soldier.gd`, `shuriken_thrower.gd`, `projectile.gd`) declares
+`{name, path, count, w, h, fps, loop}` for each animation. The file at
+`path` **must** be a horizontal strip of exactly `count` frames, each
+`w × h` pixels. Mismatches do not crash — they just silently produce
+mis-sliced sprites.
+
+| Sprite strip | Author | `count` × (`w`, `h`) |
+| --- | --- | --- |
+| `assets/sprites/player/idle.png` | `gen_player()` | `2 × (16, 24)` |
+| `assets/sprites/player/walk.png` | `gen_player()` | `4 × (16, 24)` |
+| `assets/sprites/player/jump.png` | `gen_player()` | `2 × (16, 24)` |
+| `assets/sprites/player/attack.png` | `gen_player()` | `3 × (16, 24)` |
+| `assets/sprites/player/climb.png` | `gen_player()` | `2 × (16, 24)` |
+| `assets/sprites/player/hurt.png` | `gen_player()` | `1 × (16, 24)` |
+| `assets/sprites/enemies/foot_soldier.png` | `gen_foot_soldier()` | `2 × (16, 16)` |
+| `assets/sprites/enemies/shuriken_thrower.png` | `gen_shuriken_thrower()` | `2 × (16, 16)` |
+| `assets/sprites/enemies/boss.png` | `gen_boss()` | `2 × (24, 32)` |
+| `assets/sprites/projectiles/shuriken.png` | `gen_projectile()` | `2 × (8, 8)` |
+| `assets/sprites/tiles/tileset.png` | `gen_tileset()` | `11 × (16, 16)` |
+
+If you change a frame count or dimensions in `gen_assets.py`, search
+`steel_streets/scripts/` for the matching `FRAMES_SPEC` and update it in the
+same commit.
+
+**UI text assets** are baked PNGs (no runtime font / `Theme`):
+
+- `title_main.png`, `title_sub_a.png`, `title_sub_b.png`, `press_start.png`,
+  `press_any_key.png`, `splash_caption.png`, `portrait.png`,
+  `boss_label.png`, `game_over.png`, `victory.png`,
+  `heart.png`, `heart_empty.png`.
+
+All generated by `gen_ui()` + `gen_text_assets()` in `tools/gen_assets.py`
+using the inline 5×7 bitmap font.
+
+---
+
+## 16. Verifying changes without the GUI
+
+The project is small enough that the standard validation loop is
+headless. Run from the repo root:
+
+```bash
+# 1. (Optional) regenerate assets after edits to gen_assets.py.
+python3 steel_streets/tools/gen_assets.py
+
+# 2. Confirm the project imports cleanly (catches missing files, bad
+#    .tscn references, autoload typos).
+godot --headless --editor --import --path steel_streets --quit
+
+# 3. Smoke-run the title screen for ~1 s (catches autoload errors).
+godot --headless --path steel_streets --quit-after 60
+
+# 4. Smoke-run the level for ~10 s (catches level-build errors,
+#    procedural TileSet bugs, enemy/boss spawning issues).
+godot --headless --path steel_streets \
+    res://scenes/level_1.tscn --quit-after 600
+```
+
+`--quit-after N` quits after `N` frames at the project's 60 Hz, so 600
+frames ≈ 10 seconds.
+
+If any of these print a stack trace or `ERROR:` line, fail the change.
+No CI runs Steel Streets today — these commands are the local equivalent.
+
+---
+
+## 17. Common dev recipes
+
+Short, opinionated recipes for the changes the team is most likely to make.
+Each one calls out which files you must touch together so you don't end up
+with silent drift.
+
+### Tune player or enemy balance
+
+- Player: edit the `const`s at the top of `scripts/player.gd` (`SPEED`,
+  `JUMP_VELOCITY`, `GRAVITY`, `INVINCIBLE_TIME`, `ATTACK_*`).
+- Enemy: edit `max_hp`, `contact_damage`, `score_value` in the subclass's
+  `_ready()` (e.g. `boss.gd` overrides them before calling `super()`).
+- Boss timings: edit `PAUSE_TIME`, `WINDUP_TIME`, `CHARGE_TIME`,
+  `RECOVER_TIME`, `CHARGE_SPEED` at the top of `scripts/boss.gd`.
+- Run lives / starting HP: edit `STARTING_LIVES` and `STARTING_HP` in
+  `scripts/game_manager.gd`.
+
+No HUD or balance change requires touching the `.tscn` files.
+
+### Add a level segment, ladder, spike, pickup, or enemy spawn
+
+Everything Level-1 spawns is driven from the data tables at the top of
+`scripts/level_1.gd`. To extend the level:
+
+- Append `[x0, y0, x1, y1, atlas_constant]` to `PLATFORMS` (atlas constant
+  must be `A_BRICK`, `A_CONCRETE`, or `A_ROOF` — only those three have
+  collision polygons in `_build_tileset`).
+- Append `[col, top_row, bottom_row]` to `LADDERS` (column must overlap a
+  platform; `_make_ladder` builds the Area2D + sprites + shape).
+- Append `[col, row]` to `SPIKES` or `PICKUPS`.
+- Append `[col, row]` to `FOOT_SOLDIERS` or `SHURIKEN_THROWERS`.
+- Move the boss by editing `BOSS_POS = [col, row]`.
+- World size is `WORLD_W = 100`, `WORLD_H = 9` tiles (`TILE = 16` px). Stay
+  inside that grid — the camera and TileMap painters assume it.
+
+### Add a brand-new enemy type
+
+1. Create `scripts/<name>.gd` with `extends "res://scripts/enemy_base.gd"`,
+   set `max_hp` / `contact_damage` / `score_value` in `_ready`, then call
+   `super()`.
+2. Add a `FRAMES_SPEC` const and `AnimUtil.build` it in `_ready()`. Frame
+   counts and dimensions must match the strip authored by
+   `tools/gen_assets.py` (see §15).
+3. Implement `_physics_process` for movement; the base class already
+   handles damage, hit-flash, score, and freeing on death.
+4. Create `scenes/<name>.tscn` mirroring `foot_soldier.tscn` — that means
+   `CharacterBody2D` (`collision_layer = 8`, `collision_mask = 1`),
+   `Sprite` (`AnimatedSprite2D`), `Hurtbox` (Area2D layer 8 mask 4),
+   `Hitbox` (Area2D layer 16 mask 2), and `SfxHit`.
+5. Add a spawn table to `level_1.gd` and instantiate it from
+   `_spawn_enemies()`.
+
+### Regenerate assets and audio
+
+Always run `python3 steel_streets/tools/gen_assets.py` *before* the headless
+verify steps above. The script overwrites every PNG and WAV under
+`steel_streets/assets/` — do not hand-edit those files; they will be
+clobbered on the next regen.
+
+---
+
+## 18. What does *not* exist (anti-knowledge)
 
 These are common assumptions from older docs / generated wikis that are
 **wrong** for this codebase. If you read them somewhere, treat them as bugs.
 
-- ❌ There is no `AnimationPlayer` or `AnimationTree`.
-- ❌ There is no `ParallaxBackground`.
+- ❌ There is no `AnimationPlayer` or `AnimationTree` (and therefore no
+  `AnimationNodeStateMachine` / `AnimationNodeBlendTree` either) — the
+  boss state machine is plain GDScript `enum` + `match` in
+  `_physics_process`.
+- ❌ There is no `ParallaxBackground` or `ParallaxLayer`. The visual
+  parallax-like effect is a single static painted background layer that
+  scrolls 1:1 with the camera.
+- ❌ There is no `SubViewport`, `SubViewportContainer`, or post-process
+  shader. Pixel scaling is done by the engine via
+  `display/window/stretch/mode="viewport"` + nearest-neighbour filtering.
+- ❌ There are no `move_up` / `move_down` actions. Vertical movement on
+  ladders uses `climb_up` / `climb_down`.
+- ❌ There is no `Theme` resource, no `DynamicFont`, and no `LabelSettings`.
+  Every static text the player sees is a pre-rendered PNG baked by
+  `gen_assets.py` — the only `Label`s in the project are HUD numbers
+  (lives, score, boss caption).
 - ❌ There is no `apply_palette()` or `generate_spritesheet()` function in
   `gen_assets.py` — the script generates from arrays of palette indices.
 - ❌ There are no `player_hit`, `enemy_died`, or `health_changed` signals.
+  Real signals are `score_changed`, `lives_changed`, `hp_changed` (on
+  `GameManager`) plus `boss_hp_changed`, `boss_defeated` (on the boss).
 - ❌ There is no D-pad-specific input action — gamepad d-pad is bound to the
-  same six actions everything else uses.
+  same actions everything else uses (see §2).
 - ❌ The boss does not jump and does not summon minions.
+- ❌ The player does not use a `RayCast2D`. The only raycast in the project
+  is in `foot_soldier._has_floor_ahead()`, which uses
+  `direct_space_state.intersect_ray` for ledge detection.
 - ❌ Question blocks do not spawn coins or power-ups; they heal and award
   score in place.
-- ❌ Steel Streets is not used as a Godot engine smoke test.
+- ❌ Question blocks are **not** painted by the TileMap — they are
+  per-pickup `Area2D` scenes spawned by `level_1._spawn_pickups()`.
+- ❌ Steel Streets is not used as a Godot engine smoke test, is not part of
+  upstream Godot, and is not run by Godot CI.

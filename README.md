@@ -32,6 +32,24 @@ engine, used to publish several work-for-hire titles.
 
 ![Screenshot of a 3D scene in the Godot Engine editor](https://raw.githubusercontent.com/godotengine/godot-design/master/screenshots/editor_tps_demo_1920x1080.jpg)
 
+## Steel Streets: Searching for Master Plank!
+
+This fork includes **Steel Streets**, a Game Boy-style side-scrolling beat-'em-up
+mini-game built entirely within the Godot 4.x project tree. It lives in the
+[`steel_streets/`](steel_streets/) directory and can be run standalone:
+
+```bash
+godot --path steel_streets
+```
+
+Steel Streets renders at 160×144 using the classic 4-color Game Boy green palette,
+features procedurally generated levels, programmatically created sprites/audio,
+and a complete gameplay loop (title → splash → level → victory/game-over).
+
+See [`steel_streets/README.md`](steel_streets/README.md) for controls and gameplay,
+and [`steel_streets/ARCHITECTURE.md`](steel_streets/ARCHITECTURE.md) for technical
+documentation.
+
 ## Getting the engine
 
 ### Binary downloads

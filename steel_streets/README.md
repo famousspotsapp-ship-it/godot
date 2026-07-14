@@ -66,3 +66,14 @@ python3 tools/gen_assets.py
 Beating the boss takes the player to the victory screen; running out of
 lives takes them to the game-over screen, both of which return to the
 title on any input.
+
+## Technical reference
+
+See **[ARCHITECTURE.md](ARCHITECTURE.md)** for the authoritative engineering
+reference: entity hierarchy, signal flow, physics layers, boss state machine,
+procedural level construction, asset pipeline, group conventions, frame
+contracts, dev recipes, and an explicit anti-knowledge section listing things
+that older docs claim but are not in the codebase.
+
+If something in another doc (a wiki page, a PR description, a knowledge note)
+disagrees with `ARCHITECTURE.md`, the architecture doc is correct.

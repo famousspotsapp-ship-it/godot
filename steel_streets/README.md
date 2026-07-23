@@ -66,3 +66,11 @@ python3 tools/gen_assets.py
 Beating the boss takes the player to the victory screen; running out of
 lives takes them to the game-over screen, both of which return to the
 title on any input.
+
+## Architecture
+
+See [`ARCHITECTURE.md`](ARCHITECTURE.md) for the authoritative engineering
+reference — the source map, `GameManager` state/signals, physics layers,
+scene flow, player/enemy/boss behaviour, the procedural level builder, the
+`gen_assets.py` asset pipeline, the asset↔script frame contract, headless
+verification steps, and common dev recipes.

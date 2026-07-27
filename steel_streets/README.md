@@ -55,6 +55,9 @@ python3 tools/gen_assets.py
 
 (Requires Pillow: `pip install Pillow`.)
 
+See [ARCHITECTURE.md](ARCHITECTURE.md) for how the scenes, animation, level
+generation, and combat systems are wired.
+
 ## Gameplay
 
 - 3 lives, 5 HP per life. Damage triggers ~1.2 s of invincibility frames.

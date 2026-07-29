@@ -1,0 +1,61 @@
+{
+  "repo_notes": [
+    {
+      "content": "This repository is a fork of upstream Godot Engine (currently tracking 4.7-beta). The vast majority of the tree (core/, editor/, scene/, servers/, drivers/, modules/, platform/, thirdparty/, doc/, etc.) is unmodified upstream engine source. The team's own work lives entirely in the self-contained game project at steel_streets/. When documenting this repository, prioritize steel_streets/ heavily: it is what the team actively builds and iterates on, and it would otherwise be buried under the very large upstream engine codebase. Cover upstream engine internals only at a high level unless a page explicitly targets them.",
+      "author": "Devin (DeepWiki steering)"
+    },
+    {
+      "content": "steel_streets/ is 'Steel Streets: Searching for Master Plank!', a self-contained Godot 4.x game project (its own project.godot, not built by SCons). It is a Game Boy-style side-scrolling beat-'em-up platformer inspired by the original Game Boy TMNT titles. Everything renders into a fixed 160x144 internal viewport (stretch/mode=viewport) scaled up with nearest-neighbor filtering (default_texture_filter=0) and 2D pixel snapping, and is restricted to the 4-color Game Boy green palette (#e0f8d0, #88c070, #346856, #081820). Renderer is GL Compatibility.",
+      "author": "Devin (DeepWiki steering)"
+    },
+    {
+      "content": "steel_streets architecture: a single autoload singleton, GameManager (scripts/game_manager.gd), owns persistent run state (lives, score, current/max HP) and centralizes all scene transitions between the title, splash, level, game-over, and victory scenes; it broadcasts state via score_changed / lives_changed / hp_changed signals that the HUD listens to. Gameplay entities are Godot scenes under scenes/ backed by GDScript in scripts/. Enemies (foot soldier, shuriken thrower, boss) extend a shared enemy_base.gd CharacterBody2D that handles HP, contact damage, hit-flash, and the death handshake. Physics layers are named in project.godot (world, player, player_hitbox, enemy, enemy_hitbox, ladder, pickup, hazard) and combat is Area2D hurtbox/hitbox overlap using the 'player_attack' group.",
+      "author": "Devin (DeepWiki steering)"
+    },
+    {
+      "content": "steel_streets asset pipeline: every sprite (PNG) and sound (WAV) under assets/ is generated programmatically from code by tools/gen_assets.py (Pillow for images, the stdlib wave module for audio), so the art/audio pipeline is fully reproducible with `python3 tools/gen_assets.py`. At runtime, scripts/anim_util.gd builds SpriteFrames resources by slicing horizontal sprite-sheet strips (assets/sprites/<entity>/<anim>.png) into per-frame AtlasTextures. When documenting assets, describe this generate-then-slice flow rather than treating the PNG/WAV files as hand-authored.",
+      "author": "Devin (DeepWiki steering)"
+    },
+    {
+      "content": "Building/testing the upstream engine (not the steel_streets game): build with `scons tests=yes target=editor dev_build=yes -j$(nproc)` (linking needs ~8GB RAM) and run the unit tests with `./bin/godot.linuxbsd.editor.dev.x86_64 --headless --test` (filter with `--test-case=\"*Pattern*\"`). The steel_streets game is instead run directly with a Godot 4.x editor/binary via `godot --path steel_streets`; its main scene is scenes/title_screen.tscn.",
+      "author": "Devin (DeepWiki steering)"
+    }
+  ],
+  "pages": [
+    {
+      "title": "Repository Overview: Godot fork + Steel Streets",
+      "purpose": "Explain that this repo is a fork of upstream Godot Engine (4.7-beta) whose only team-authored addition is the steel_streets/ game project. Give readers a map: upstream engine directories at a glance, and a clear pointer that day-to-day team work happens in steel_streets/. Summarize how to build/test the engine vs. how to run the game.",
+      "parent": null
+    },
+    {
+      "title": "Steel Streets Mini-Game",
+      "purpose": "Top-level overview of the steel_streets/ Game Boy-style beat-'em-up: concept, the 160x144 nearest-neighbor viewport and 4-color GB palette, the overall title -> splash -> level -> victory/game-over flow, controls, project layout (project.godot, scenes/, scripts/, assets/, tools/), and how to run it.",
+      "parent": null
+    },
+    {
+      "title": "Game Flow and GameManager Autoload",
+      "purpose": "Document scripts/game_manager.gd as the autoload singleton that owns run state (lives, score, HP) and centralizes scene transitions, including its navigation helpers, the score_changed/lives_changed/hp_changed signals, reset_run, and how the title/splash/level/game_over/victory scene scripts drive transitions on input.",
+      "parent": "Steel Streets Mini-Game"
+    },
+    {
+      "title": "Player Controller",
+      "purpose": "Document scripts/player.gd: movement, jumping, ladder climbing, melee attack and the player_attack hitbox, taking damage with invincibility frames, lives/HP interaction with GameManager, and the AnimatedSprite2D animation states.",
+      "parent": "Steel Streets Mini-Game"
+    },
+    {
+      "title": "Enemies and Combat",
+      "purpose": "Document the shared scripts/enemy_base.gd CharacterBody2D (HP, contact damage, hit-flash, death handshake, hurtbox/hitbox Area2D wiring, score drop) and its subclasses foot_soldier.gd, shuriken_thrower.gd (with projectile.gd), and boss.gd. Explain the named 2D physics layers and the group-based hit detection.",
+      "parent": "Steel Streets Mini-Game"
+    },
+    {
+      "title": "Level, HUD and Interactables",
+      "purpose": "Document scripts/level_1.gd (level construction/layout, enemy and platform placement, camera/screen scrolling, win condition), scripts/hud.gd (hearts, score, lives driven by GameManager signals), and scripts/question_block.gd (punchable score/heal blocks).",
+      "parent": "Steel Streets Mini-Game"
+    },
+    {
+      "title": "Asset and Audio Generation Pipeline",
+      "purpose": "Document tools/gen_assets.py (generates all PNG sprites via Pillow and WAV audio via the wave module for a reproducible pipeline) and scripts/anim_util.gd (builds SpriteFrames from horizontal sprite-sheet strips into AtlasTextures). Describe the assets/sprites and assets/audio layout and how sheets map to animations.",
+      "parent": "Steel Streets Mini-Game"
+    }
+  ]
+}

@@ -46,6 +46,10 @@ steel_streets/
     └── gen_assets.py      # regenerates every PNG/WAV from code (Pillow + wave)
 ```
 
+See [`ARCHITECTURE.md`](ARCHITECTURE.md) for how the project is put together
+(runtime-built `SpriteFrames`, the procedurally generated level, the
+`GameManager` autoload, and the physics layer conventions).
+
 All sprites and audio are generated programmatically by
 `tools/gen_assets.py` so the entire art and sound pipeline is reproducible:
 

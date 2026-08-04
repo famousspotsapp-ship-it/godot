@@ -14,12 +14,19 @@ green palette:
 
 ## Running
 
-1. Install [Godot 4.3+](https://godotengine.org/download).
-2. Open the editor and import this folder, or run from the command line:
+1. Install [Godot 4.3+](https://godotengine.org/download), or build the engine
+   from this repository (see [../FORK.md](../FORK.md)).
+2. Open the editor and import this folder, or run from the repository root:
    ```bash
    godot --path steel_streets
+   # or, with a binary built from this tree:
+   ./bin/godot.linuxbsd.editor.dev.x86_64 --path steel_streets
    ```
    The main scene (`scenes/title_screen.tscn`) launches automatically.
+
+The project declares the `4.3` feature tag while the engine source in this fork
+is 4.7-beta; opening it in a newer editor offers to bump the tag, which is not
+required for the project to run.
 
 ## Controls
 
@@ -36,6 +43,7 @@ green palette:
 ```
 steel_streets/
 ├── project.godot          # input map, autoload, viewport scaling
+├── ARCHITECTURE.md        # scene graph, collision layers, level builder
 ├── icon.svg
 ├── scenes/                # title, splash, level, game over, victory + entity scenes
 ├── scripts/               # GDScript files (autoload, player, enemies, HUD, ...)
@@ -50,10 +58,14 @@ All sprites and audio are generated programmatically by
 `tools/gen_assets.py` so the entire art and sound pipeline is reproducible:
 
 ```bash
-python3 tools/gen_assets.py
+python3 steel_streets/tools/gen_assets.py
 ```
 
-(Requires Pillow: `pip install Pillow`.)
+(Requires Pillow: `pip install Pillow`.) Do not hand-edit the generated PNG/WAV
+files — change the generator and re-run it.
+
+For scene/script structure, the collision-layer map, the animation approach, and
+the procedural level builder, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Gameplay
 

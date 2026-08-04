@@ -6,6 +6,11 @@
   </a>
 </p>
 
+> **Note:** this is a fork of [godotengine/godot](https://github.com/godotengine/godot).
+> The engine source is unmodified; the fork adds the `steel_streets/` game
+> project. See [FORK.md](FORK.md) for what differs, how to build, and how to run
+> the bundled game.
+
 ## 2D and 3D cross-platform game engine
 
 **[Godot Engine](https://godotengine.org) is a feature-packed, cross-platform

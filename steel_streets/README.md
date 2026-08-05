@@ -12,9 +12,14 @@ green palette:
 | -------- | -------- | -------- | -------- |
 | `#e0f8d0` | `#88c070` | `#346856` | `#081820` |
 
+For how the project is structured internally — scene flow, the runtime
+`SpriteFrames` animation helper, the procedurally built level, collision layers
+— see [ARCHITECTURE.md](ARCHITECTURE.md).
+
 ## Running
 
-1. Install [Godot 4.3+](https://godotengine.org/download).
+1. Install [Godot 4.3+](https://godotengine.org/download), or build one from
+   this repository (see [FORK.md](../FORK.md)).
 2. Open the editor and import this folder, or run from the command line:
    ```bash
    godot --path steel_streets

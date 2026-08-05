@@ -1,5 +1,10 @@
 # Godot Engine
 
+> **This is a fork.** It tracks upstream `godotengine/godot` and adds the
+> [`steel_streets/`](steel_streets/) demo project on top of an otherwise
+> unmodified engine. See [FORK.md](FORK.md) for the fork's state, build/test
+> commands, and how to run the bundled game.
+
 <p align="center">
   <a href="https://godotengine.org">
     <img src="misc/logo/logo_outlined.svg" width="400" alt="Godot Engine logo">

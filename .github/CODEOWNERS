@@ -289,3 +289,7 @@
 *.py                                          @godotengine/buildsystem
 SConstruct                                    @godotengine/buildsystem
 SCsub                                         @godotengine/buildsystem
+
+# Fork-specific: bundled sample game
+
+/steel_streets/                               @Salim-deal-nav-1

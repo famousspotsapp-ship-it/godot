@@ -21,6 +21,27 @@ green palette:
    ```
    The main scene (`scenes/title_screen.tscn`) launches automatically.
 
+### With an engine built from this repository
+
+This repo is a Godot fork (currently tracking upstream 4.7-beta), so a binary
+built here also runs the project — the `4.3` feature tag in `project.godot` is a
+minimum version, not a pin. From the repository root, after building (see
+[../FORK_NOTES.md](../FORK_NOTES.md)):
+
+```bash
+./bin/godot.linuxbsd.editor.dev.x86_64 --path steel_streets
+```
+
+A headless import/parse smoke check, useful when there is no display and as a
+quick regression check on scenes and scripts:
+
+```bash
+./bin/godot.linuxbsd.editor.dev.x86_64 --headless --path steel_streets --quit
+```
+
+No CI workflow covers this project, so run the check locally before pushing
+gameplay changes.
+
 ## Controls
 
 | Action | Keyboard | Gamepad |
@@ -50,10 +71,13 @@ All sprites and audio are generated programmatically by
 `tools/gen_assets.py` so the entire art and sound pipeline is reproducible:
 
 ```bash
-python3 tools/gen_assets.py
+python3 steel_streets/tools/gen_assets.py   # runnable from any directory
 ```
 
-(Requires Pillow: `pip install Pillow`.)
+(Requires Pillow: `pip install Pillow`. Output paths are resolved from the
+script location, so the working directory does not matter. Regenerated PNG/WAV
+files are re-imported by the editor on next open; the `.import` files are
+committed, so check `git status` afterwards.)
 
 ## Gameplay
 

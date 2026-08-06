@@ -44,6 +44,12 @@ Official binaries for the Godot editor and the export templates can be found
 [See the official docs](https://docs.godotengine.org/en/latest/engine_details/development/compiling)
 for compilation instructions for every supported platform.
 
+### This fork
+
+This fork adds the `steel_streets/` sample project on top of upstream Godot.
+See [FORK_NOTES.md](FORK_NOTES.md) for what is fork-specific, the build, test
+and static-check commands used here, and CI coverage caveats.
+
 ## Community and contributing
 
 Godot is not only an engine but an ever-growing community of users and engine

@@ -67,7 +67,9 @@ pre-commit install          # installs the git hook
 pre-commit run --all-files  # slow on a full checkout; prefer the hook
 ```
 
-CI runs the same checks in `.github/workflows/static_checks.yml`.
+CI runs the same checks in `.github/workflows/static_checks.yml`. One of them,
+`validate-codeowners --unowned`, fails on any path missing from
+`.github/CODEOWNERS`, so fork-specific directories need an entry there.
 
 ## CI coverage
 

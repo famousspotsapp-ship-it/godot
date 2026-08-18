@@ -55,6 +55,11 @@ python3 tools/gen_assets.py
 
 (Requires Pillow: `pip install Pillow`.)
 
+## Architecture
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the code-level reference (autoload
+state, animation approach, enemy/boss contracts, procedural level generation).
+
 ## Gameplay
 
 - 3 lives, 5 HP per life. Damage triggers ~1.2 s of invincibility frames.

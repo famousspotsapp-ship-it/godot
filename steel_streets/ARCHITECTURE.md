@@ -94,7 +94,7 @@ Cross-entity lookups use groups rather than layers: `player`, `player_attack`,
 `enemy`, `boss`, `ladder`.
 
 Note the level still uses the `TileMap` node, which is deprecated in this engine
-in favour of one `TileMapLayer` per layer; migrating means reworking the
+in favor of one `TileMapLayer` per layer; migrating means reworking the
 `tilemap.set_cell(layer, ...)` calls in `level_1.gd`.
 
 ## Working on the game

@@ -283,6 +283,10 @@
 /thirdparty/                                  @godotengine/buildsystem
 /thirdparty/jolt_physics/                     @godotengine/buildsystem @godotengine/jolt-physics
 
+# Steel Streets (fork-only game project)
+
+/steel_streets/                               @Salim-deal-nav-1
+
 # Buildsystem (After everything to catch all)
 
 /*.*                                          @godotengine/buildsystem

@@ -36,6 +36,7 @@ green palette:
 ```
 steel_streets/
 ├── project.godot          # input map, autoload, viewport scaling
+├── ARCHITECTURE.md        # implementation reference (GameManager, scene flow, entities)
 ├── icon.svg
 ├── scenes/                # title, splash, level, game over, victory + entity scenes
 ├── scripts/               # GDScript files (autoload, player, enemies, HUD, ...)

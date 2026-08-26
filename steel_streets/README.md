@@ -55,6 +55,13 @@ python3 tools/gen_assets.py
 
 (Requires Pillow: `pip install Pillow`.)
 
+## Architecture
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the implementation reference:
+scene flow, `GameManager` state and signals, the runtime `SpriteFrames`
+animation approach (no `AnimationPlayer`/`AnimationTree`), combat wiring, the
+8-layer physics setup, and how `level_1` is generated in code.
+
 ## Gameplay
 
 - 3 lives, 5 HP per life. Damage triggers ~1.2 s of invincibility frames.

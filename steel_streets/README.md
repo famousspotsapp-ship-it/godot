@@ -12,6 +12,9 @@ green palette:
 | -------- | -------- | -------- | -------- |
 | `#e0f8d0` | `#88c070` | `#346856` | `#081820` |
 
+For scene flow, physics layers, and combat details, see
+[ARCHITECTURE.md](ARCHITECTURE.md).
+
 ## Running
 
 1. Install [Godot 4.3+](https://godotengine.org/download).
@@ -20,6 +23,9 @@ green palette:
    godot --path steel_streets
    ```
    The main scene (`scenes/title_screen.tscn`) launches automatically.
+   The engine built from this repository (currently 4.7-beta, see `version.py`)
+   runs the project too:
+   `./bin/godot.linuxbsd.editor.dev.x86_64 --path steel_streets`.
 
 ## Controls
 
@@ -36,6 +42,7 @@ green palette:
 ```
 steel_streets/
 ├── project.godot          # input map, autoload, viewport scaling
+├── ARCHITECTURE.md        # scene flow, physics layers, combat details
 ├── icon.svg
 ├── scenes/                # title, splash, level, game over, victory + entity scenes
 ├── scripts/               # GDScript files (autoload, player, enemies, HUD, ...)

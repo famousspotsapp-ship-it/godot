@@ -32,6 +32,27 @@ engine, used to publish several work-for-hire titles.
 
 ![Screenshot of a 3D scene in the Godot Engine editor](https://raw.githubusercontent.com/godotengine/godot-design/master/screenshots/editor_tps_demo_1920x1080.jpg)
 
+## About this fork
+
+This is a fork of [godotengine/godot](https://github.com/godotengine/godot),
+currently tracking `master` at version `4.7-beta` (see `version.py`). Beyond
+upstream, it contains one addition:
+
+- [`steel_streets/`](steel_streets/README.md) — *Steel Streets: Searching for
+  Master Plank!*, a self-contained Game Boy-style beat-'em-up written in
+  GDScript that runs on the engine built from this tree. Nothing under
+  `steel_streets/` is compiled into the engine, and the engine's C++ test suite
+  does not cover it; see its README for architecture and how to run it.
+
+Common commands for this tree:
+
+```bash
+scons tests=yes target=editor dev_build=yes -j$(nproc)   # build the editor
+./bin/godot.linuxbsd.editor.dev.x86_64 --headless --test  # run engine tests
+./bin/godot.linuxbsd.editor.dev.x86_64 --path steel_streets  # run the game
+pre-commit run --all-files                                # static checks
+```
+
 ## Getting the engine
 
 ### Binary downloads

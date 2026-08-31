@@ -1,8 +1,12 @@
 # Steel Streets: Searching for Master Plank!
 
-A side-scrolling beat-'em-up platformer built in Godot 4.3 that channels the
-look and feel of the original Game Boy *Teenage Mutant Ninja Turtles* games
-(*Fall of the Foot Clan*, *Back from the Sewers*).
+A side-scrolling beat-'em-up platformer that channels the look and feel of the
+original Game Boy *Teenage Mutant Ninja Turtles* games (*Fall of the Foot
+Clan*, *Back from the Sewers*). It targets Godot 4.3+ features and is developed
+against the engine built from this repository (currently 4.7-beta).
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the scene flow, `GameManager` API,
+entity hierarchy, and level generation details.
 
 The whole game renders into a 160x144 internal viewport scaled up with
 nearest-neighbor filtering and is restricted to the classic Game Boy
@@ -14,10 +18,12 @@ green palette:
 
 ## Running
 
-1. Install [Godot 4.3+](https://godotengine.org/download).
+1. Build the engine from this repository (see `../README.md`), or install
+   [Godot 4.3+](https://godotengine.org/download).
 2. Open the editor and import this folder, or run from the command line:
    ```bash
-   godot --path steel_streets
+   bin/godot.linuxbsd.editor.dev.x86_64 --path steel_streets   # locally built
+   godot --path steel_streets                                   # released binary
    ```
    The main scene (`scenes/title_screen.tscn`) launches automatically.
 
@@ -36,6 +42,7 @@ green palette:
 ```
 steel_streets/
 ├── project.godot          # input map, autoload, viewport scaling
+├── ARCHITECTURE.md        # scene flow, GameManager API, entity/tuning reference
 ├── icon.svg
 ├── scenes/                # title, splash, level, game over, victory + entity scenes
 ├── scripts/               # GDScript files (autoload, player, enemies, HUD, ...)

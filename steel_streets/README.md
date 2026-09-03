@@ -12,6 +12,9 @@ green palette:
 | -------- | -------- | -------- | -------- |
 | `#e0f8d0` | `#88c070` | `#346856` | `#081820` |
 
+See [ARCHITECTURE.md](ARCHITECTURE.md) for scene flow, the `GameManager`
+API, entity/combat design, physics layers and the runtime animation pipeline.
+
 ## Running
 
 1. Install [Godot 4.3+](https://godotengine.org/download).

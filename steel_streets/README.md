@@ -31,11 +31,15 @@ green palette:
 | Climb up / down (on ladder) | `W` / `S` or `↑` / `↓` | d-pad |
 | Start / advance screen | `Enter` or `Space` | Start |
 
+See [ARCHITECTURE.md](ARCHITECTURE.md) for scene flow, the `GameManager`
+API, physics layers, entity contracts, and how `level_1.gd` builds the level.
+
 ## Project layout
 
 ```
 steel_streets/
 ├── project.godot          # input map, autoload, viewport scaling
+├── ARCHITECTURE.md        # code-level reference for scripts/scenes
 ├── icon.svg
 ├── scenes/                # title, splash, level, game over, victory + entity scenes
 ├── scripts/               # GDScript files (autoload, player, enemies, HUD, ...)

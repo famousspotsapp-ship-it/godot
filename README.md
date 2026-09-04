@@ -55,6 +55,18 @@ The best way to get in touch with the core engine developers is to join the
 To get started contributing to the project, see the [contributing guide](CONTRIBUTING.md).
 This document also includes guidelines for reporting bugs.
 
+## Repository additions
+
+This fork tracks upstream Godot (`version.py` currently reports 4.7-beta) and
+adds one non-engine directory:
+
+- [`steel_streets/`](steel_streets/) — *Steel Streets: Searching for Master
+  Plank!*, a self-contained Game Boy-style GDScript game project. It is not
+  compiled into the engine; open it with `godot --path steel_streets`. See its
+  [README](steel_streets/README.md) for controls and
+  [ARCHITECTURE.md](steel_streets/ARCHITECTURE.md) for how the scenes, scripts,
+  physics layers, and level generator fit together.
+
 ## Documentation and demos
 
 The official documentation is hosted on [Read the Docs](https://docs.godotengine.org).

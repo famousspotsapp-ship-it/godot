@@ -72,5 +72,14 @@ provided by the community, such as text and video tutorials, demos, etc.
 Consult the [community channels](https://godotengine.org/community)
 for more information.
 
+## Bundled project: Steel Streets
+
+This fork ships a small Game Boy-style GDScript game in
+[`steel_streets/`](steel_streets/README.md). It is a standalone Godot 4.3+
+project (open it with `godot --path steel_streets`), independent of the engine
+build in this tree. See
+[`steel_streets/ARCHITECTURE.md`](steel_streets/ARCHITECTURE.md) for how it is
+structured.
+
 [![Code Triagers Badge](https://www.codetriage.com/godotengine/godot/badges/users.svg)](https://www.codetriage.com/godotengine/godot)
 [![Translate on Weblate](https://hosted.weblate.org/widgets/godot-engine/-/godot/svg-badge.svg)](https://hosted.weblate.org/engage/godot-engine/?utm_source=widget)

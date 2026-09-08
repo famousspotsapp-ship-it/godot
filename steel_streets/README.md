@@ -31,6 +31,9 @@ green palette:
 | Climb up / down (on ladder) | `W` / `S` or `↑` / `↓` | d-pad |
 | Start / advance screen | `Enter` or `Space` | Start |
 
+For how the scripts, scenes, physics layers and scene flow fit together, see
+[ARCHITECTURE.md](ARCHITECTURE.md).
+
 ## Project layout
 
 ```

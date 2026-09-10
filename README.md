@@ -32,6 +32,37 @@ engine, used to publish several work-for-hire titles.
 
 ![Screenshot of a 3D scene in the Godot Engine editor](https://raw.githubusercontent.com/godotengine/godot-design/master/screenshots/editor_tps_demo_1920x1080.jpg)
 
+## About this fork (famousspotsapp-ship-it/godot)
+
+This repository tracks upstream `godotengine/godot` `master` (currently
+`4.7-beta`, see `version.py`) and adds one in-tree project:
+
+- [`steel_streets/`](steel_streets/README.md) — *Steel Streets: Searching for
+  Master Plank!*, a Game Boy-style GDScript beat-'em-up used as the team's
+  reference/sample game. It is a standalone Godot project (`project.godot`)
+  and is **not** part of the engine's SCons build; the engine source tree is
+  otherwise unmodified from upstream.
+
+Common commands for working in this repository on Linux:
+
+```bash
+# Build the editor with the unit-test harness (dev_build enables asserts).
+scons tests=yes target=editor dev_build=yes -j$(nproc)
+
+# Run the C++ unit tests (doctest); filter with --test-case="*AnimationPlayer*".
+./bin/godot.linuxbsd.editor.dev.x86_64 --headless --test
+
+# Run the sample game with the freshly built editor binary.
+./bin/godot.linuxbsd.editor.dev.x86_64 --path steel_streets
+
+# Regenerate the sample game's sprites/audio (requires Pillow).
+python3 steel_streets/tools/gen_assets.py
+```
+
+Linking the editor needs roughly 8 GB of RAM. Code style is enforced with
+`pre-commit` (see `.pre-commit-config.yaml`); there is no separate lint
+command.
+
 ## Getting the engine
 
 ### Binary downloads

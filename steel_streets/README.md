@@ -65,9 +65,8 @@ python3 steel_streets/tools/gen_assets.py
 ### Scene flow
 
 The configured entry point is `scenes/title_screen.tscn`
-(`application/run/main_scene` in `project.godot`). The runtime flow is:
-Because the project entry point is the title scene, the code flow starts with
-title and then shows the splash; there is no splash-to-title transition.
+(`application/run/main_scene` in `project.godot`), so a run starts on the
+title screen and the splash is shown afterwards. The runtime flow is:
 
 1. **Title → splash:** `title_screen.gd::_advance()` calls
    `GameManager.goto_splash()`. The autoload's `goto_splash()` calls

@@ -6,6 +6,28 @@
   </a>
 </p>
 
+## About this repository
+
+This is the `famousspotsapp-ship-it` fork of the upstream
+[godotengine/godot](https://github.com/godotengine/godot) `master` branch
+(currently tracking the **4.7 beta** development cycle, see `version.py`).
+Engine source is unmodified from upstream. The fork adds one thing on top:
+
+- [`steel_streets/`](steel_streets/README.md) — *Steel Streets: Searching for
+  Master Plank!*, a self-contained Game Boy-style GDScript demo game. It is a
+  regular Godot 4 project (no engine changes required); see its
+  [README](steel_streets/README.md) to run it and
+  [ARCHITECTURE.md](steel_streets/ARCHITECTURE.md) for how it is structured.
+
+Local engine workflow used by this team (Linux):
+
+```bash
+scons tests=yes target=editor dev_build=yes -j$(nproc)   # build editor + unit tests (~8 GB RAM to link)
+./bin/godot.linuxbsd.editor.dev.x86_64 --headless --test # run the doctest suite
+./bin/godot.linuxbsd.editor.dev.x86_64 --path steel_streets  # run the demo with the freshly built editor
+pre-commit run --files <changed files>                   # style checks (see .pre-commit-config.yaml)
+```
+
 ## 2D and 3D cross-platform game engine
 
 **[Godot Engine](https://godotengine.org) is a feature-packed, cross-platform

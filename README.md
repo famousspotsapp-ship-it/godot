@@ -6,6 +6,24 @@
   </a>
 </p>
 
+## About this fork
+
+This repository is a fork of the upstream Godot Engine source tree (currently
+tracking `4.7-beta`, see `version.py`) that additionally bundles
+**Steel Streets: Searching for Master Plank!**, a Game Boy-style GDScript
+beat-'em-up demo project living in [`steel_streets/`](steel_streets/). The
+demo is a plain Godot project — it is not compiled into the engine — and is
+documented in [`steel_streets/README.md`](steel_streets/README.md) (how to
+run/play) and [`steel_streets/ARCHITECTURE.md`](steel_streets/ARCHITECTURE.md)
+(scene flow, entities, collision layers, asset pipeline).
+
+To build the engine and run the demo from this tree on Linux:
+
+```bash
+scons target=editor dev_build=yes -j$(nproc)
+./bin/godot.linuxbsd.editor.dev.x86_64 --path steel_streets
+```
+
 ## 2D and 3D cross-platform game engine
 
 **[Godot Engine](https://godotengine.org) is a feature-packed, cross-platform

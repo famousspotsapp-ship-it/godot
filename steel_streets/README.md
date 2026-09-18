@@ -1,6 +1,6 @@
 # Steel Streets: Searching for Master Plank!
 
-A side-scrolling beat-'em-up platformer built in Godot 4.3 that channels the
+A side-scrolling beat-'em-up platformer for Godot 4.3+ that channels the
 look and feel of the original Game Boy *Teenage Mutant Ninja Turtles* games
 (*Fall of the Foot Clan*, *Back from the Sewers*).
 
@@ -14,12 +14,21 @@ green palette:
 
 ## Running
 
-1. Install [Godot 4.3+](https://godotengine.org/download).
-2. Open the editor and import this folder, or run from the command line:
+1. Install [Godot 4.3+](https://godotengine.org/download), or build the
+   editor from this repository (`scons target=editor dev_build=yes`, output
+   in `bin/`).
+2. Open the editor and import this folder, or run from the command line at
+   the repo root:
    ```bash
    godot --path steel_streets
+   # or, using the in-tree build on Linux:
+   ./bin/godot.linuxbsd.editor.dev.x86_64 --path steel_streets
    ```
    The main scene (`scenes/title_screen.tscn`) launches automatically.
+
+The project uses the `GL Compatibility` renderer, so it runs without Vulkan.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for how the scenes, scripts,
+collision layers, and asset generator fit together.
 
 ## Controls
 

@@ -44,6 +44,28 @@ Official binaries for the Godot editor and the export templates can be found
 [See the official docs](https://docs.godotengine.org/en/latest/engine_details/development/compiling)
 for compilation instructions for every supported platform.
 
+## This fork
+
+This repository tracks upstream Godot (`version.py` gives the exact engine
+version) and adds:
+
+- [`steel_streets/`](steel_streets/README.md) — *Steel Streets: Searching for
+  Master Plank!*, a self-contained Game Boy-style GDScript demo project. It
+  uses only the public scripting API and has no engine modifications; see its
+  [architecture notes](steel_streets/ARCHITECTURE.md) for how the scenes,
+  scripts and generated-asset pipeline fit together.
+
+Quick local workflow on Linux:
+
+```bash
+scons tests=yes target=editor dev_build=yes -j$(nproc)   # linking needs ~8 GB RAM
+./bin/godot.linuxbsd.editor.dev.x86_64 --headless --test # engine unit tests (doctest)
+./bin/godot.linuxbsd.editor.dev.x86_64 --path steel_streets
+```
+
+There is no dedicated lint command; formatting is enforced through the
+[pre-commit](.pre-commit-config.yaml) hooks (`pre-commit run --all-files`).
+
 ## Community and contributing
 
 Godot is not only an engine but an ever-growing community of users and engine

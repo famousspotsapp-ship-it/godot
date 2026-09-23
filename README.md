@@ -44,6 +44,54 @@ Official binaries for the Godot editor and the export templates can be found
 [See the official docs](https://docs.godotengine.org/en/latest/engine_details/development/compiling)
 for compilation instructions for every supported platform.
 
+## About this fork
+
+This repository tracks upstream Godot (`version.py` currently reports
+**4.7 beta**) and additionally ships a small GDScript game in
+[`steel_streets/`](steel_streets/README.md): *Steel Streets: Searching for
+Master Plank!*, a Game Boy-style beat-'em-up used as an in-tree sample
+project. It is a self-contained Godot project (no engine or module changes)
+and can be run against any editor build with:
+
+```bash
+./bin/godot.linuxbsd.editor.dev.x86_64 --path steel_streets
+```
+
+### Repository layout
+
+| Path | Contents |
+| ---- | -------- |
+| `core/` | Object model, `Variant`, containers, math, I/O, `ProjectSettings`, `OS` abstraction |
+| `scene/` | `Node` tree, GUI controls, 2D/3D nodes, animation, resources |
+| `servers/` | `RenderingServer`, physics, audio, navigation, `TextServer`, XR |
+| `drivers/` | Vulkan / D3D12 / Metal / GLES3 backends and platform driver code |
+| `modules/` | Built-in modules (GDScript, mono/.NET, OpenXR, GLTF, …), each with `register_types.cpp` and `config.py` |
+| `platform/` | Per-OS ports with `detect.py`, `os_*.cpp` and `display_server_*.cpp` |
+| `editor/` | Editor application (`EditorNode`), docks, inspector, import and export |
+| `main/` | Engine entry point (`Main::setup` / `Main::start` / `Main::iteration`) |
+| `tests/` | doctest-based unit tests, built with `scons tests=yes` |
+| `doc/classes/` | XML class reference used to generate the editor help and docs |
+| `misc/` | Distribution files, scripts, `extension_api_validation/` |
+| `thirdparty/` | Vendored dependencies (see `thirdparty/README.md`) |
+| `steel_streets/` | Steel Streets sample game (GDScript project) |
+
+### Building and testing locally
+
+```bash
+# Editor build with the unit-test runner compiled in (linking needs ~8 GB RAM).
+scons tests=yes target=editor dev_build=yes -j$(nproc)
+
+# Run the whole doctest suite headlessly, or filter to a case.
+./bin/godot.linuxbsd.editor.dev.x86_64 --headless --test
+./bin/godot.linuxbsd.editor.dev.x86_64 --headless --test --test-case="*AnimationPlayer*"
+
+# Style checks (clang-format, ruff, mypy, codespell, doc validation) run via pre-commit.
+pre-commit run --all-files
+```
+
+CI is defined in `.github/workflows/`: `runner.yml` fans out to
+`static_checks.yml` and the per-platform `*_builds.yml` workflows.
+
 ## Community and contributing
 
 Godot is not only an engine but an ever-growing community of users and engine

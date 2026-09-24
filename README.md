@@ -1,5 +1,16 @@
 # Godot Engine
 
+> **About this fork (famousspotsapp-ship-it/godot)**
+>
+> This repository is an unmodified mirror of upstream
+> [godotengine/godot](https://github.com/godotengine/godot) (`master`, 4.7 dev
+> cycle — see `version.py`) plus one addition: the
+> [`steel_streets/`](steel_streets/) directory, a self-contained Game Boy-style
+> GDScript demo game. No engine, module or build-system code has been changed.
+> See [`steel_streets/README.md`](steel_streets/README.md) to run it and
+> [`steel_streets/ARCHITECTURE.md`](steel_streets/ARCHITECTURE.md) for how it
+> is structured. Everything below is the upstream engine README.
+
 <p align="center">
   <a href="https://godotengine.org">
     <img src="misc/logo/logo_outlined.svg" width="400" alt="Godot Engine logo">

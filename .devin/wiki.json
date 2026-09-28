@@ -1,0 +1,205 @@
+{
+  "repo_notes": [
+    {
+      "content": "Repository identity: famousspotsapp-ship-it/godot is a fork of upstream godotengine/godot tracking the `master` branch at engine version 4.7-beta (see version.py: major=4, minor=7, patch=0, status=\"beta\"). The only fork-specific code is the `steel_streets/` directory, a standalone GDScript demo game project. Every other directory (core/, servers/, scene/, editor/, main/, platform/, drivers/, modules/, thirdparty/, tests/, doc/, misc/) is upstream Godot engine code. Never attribute engine C++ code to Steel Streets, and never describe Steel Streets as part of the engine build: SCons does not compile or reference steel_streets/."
+    },
+    {
+      "content": "Architecture layering to use consistently across pages: `core/` (Object/ClassDB, Variant, math, io, os, config, input) is the foundation and must not depend on other layers. `servers/` (rendering, physics_2d, physics_3d, navigation_2d, navigation_3d, audio, text, display, xr, camera, movie_writer, debugger) builds on core. `scene/` (main, 2d, 3d, gui, animation, resources, theme) builds on core and servers. `editor/` builds on everything and is only compiled when TOOLS_ENABLED (target=editor). `main/main.cpp` wires the layers together during startup. `platform/<name>/` (android, ios, linuxbsd, macos, visionos, web, windows) implements OS and DisplayServer; `drivers/` holds shared backends (vulkan, d3d12, metal, gles3, unix, windows, apple, apple_embedded, sdl, accesskit, audio drivers). `modules/` are optional components registered via register_types.cpp and config.py (gdscript, mono, openxr, webxr, text_server_adv, navigation, etc.)."
+    },
+    {
+      "content": "Team build/test workflow (Linux dev VM): build with `scons tests=yes target=editor dev_build=yes -j$(nproc)`; linking needs ~8 GB RAM (swap configured). The resulting binary is `bin/godot.linuxbsd.editor.dev.x86_64`. Run unit tests headless with `./bin/godot.linuxbsd.editor.dev.x86_64 --headless --test`, and filter with `--test-case=\"*AnimationPlayer*\"`. Lint via `pre-commit run --files <changed files>` using .pre-commit-config.yaml (clang-format, clang-tidy, ruff-check, ruff-format, mypy, codespell, make-rst, doc-status, validate-xml, validate-includes, copyright-headers, header-guards, file-format, dotnet-format, eslint, svgo). Include these exact commands on the Building, Test Suite and Development Workflow pages."
+    },
+    {
+      "content": "Citation accuracy rules: only cite files that actually implement the behavior being described on a page. For Steel Streets, cite files under steel_streets/ (project.godot, scripts/*.gd, scenes/*.tscn, tools/gen_assets.py, README.md), not modules/gdscript internals. In architecture diagrams, map Node to scene/main/node.h, SceneTree to scene/main/scene_tree.h, Control to scene/gui/control.h, and EditorNode to editor/editor_node.h. Keep thirdparty library details (e.g. Embree, thirdparty/README.md) on the Modules/Thirdparty page, not on CI or workflow pages."
+    }
+  ],
+  "pages": [
+    {
+      "title": "Overview",
+      "purpose": "High-level overview of the repository: an upstream Godot 4.7-beta engine fork plus the fork-specific steel_streets/ demo game. Describe the top-level directory map, the core -> servers -> scene -> editor layering, and link to every section.",
+      "parent": null,
+      "page_notes": [
+        {
+          "content": "Call out clearly that steel_streets/ is the only fork-specific addition and link to the Steel Streets Demo Game page."
+        }
+      ]
+    },
+    {
+      "title": "Engine Startup and Main Loop",
+      "purpose": "Document main/main.cpp (Main::setup, setup2, start, iteration, cleanup), main_timer_sync, OS::run loops per platform, MainLoop/SceneTree handoff and the physics/process tick order.",
+      "parent": "Overview"
+    },
+    {
+      "title": "Building from Source (SCons)",
+      "purpose": "Document SConstruct, methods.py, version.py, platform/*/detect.py, SCsub conventions, build options (target, dev_build, tests, scu_build, lto, optimize, module_*_enabled), output naming in bin/, and generated-code builders (*_builders.py).",
+      "parent": "Overview",
+      "page_notes": [
+        {
+          "content": "Include the team's standard build command `scons tests=yes target=editor dev_build=yes -j$(nproc)` and the resulting binary name `bin/godot.linuxbsd.editor.dev.x86_64`, plus the ~8 GB link memory requirement."
+        }
+      ]
+    },
+    {
+      "title": "Steel Streets Demo Game",
+      "purpose": "Document the fork-specific steel_streets/ Godot project: project configuration, scene flow, GDScript architecture, gameplay systems, and the procedural asset generation pipeline in tools/gen_assets.py. This is team-owned code and should be documented in concrete detail.",
+      "parent": null,
+      "page_notes": [
+        {
+          "content": "Facts from project.godot: config_version=5, features \"4.3\" + \"GL Compatibility\" (renderer gl_compatibility on desktop and mobile), main scene res://scenes/title_screen.tscn, 160x144 viewport scaled to a 640x576 window with stretch mode viewport / aspect keep, nearest texture filter, 2D pixel snapping. Autoload: GameManager = res://scripts/game_manager.gd. Input actions: move_left, move_right, jump, attack, climb_up, climb_down, start (keyboard + gamepad). 2D physics layer names: 1 world, 2 player, 3 player_hitbox, 4 enemy, 5 enemy_hitbox, 6 ladder, 7 pickup, 8 hazard. Run with `godot --path steel_streets` using a built or downloaded Godot 4.3+ binary."
+        },
+        {
+          "content": "Scene flow: title_screen -> splash_screen (auto-advances after 2.5 s or on input) -> level_1 -> game_over or victory -> title. All transitions go through GameManager.goto_title/goto_splash/goto_level/goto_game_over/goto_victory, which call SceneTree.change_scene_to_file. GameManager also owns run state (lives=3, hp=5, score) and emits score_changed, lives_changed, hp_changed; take_life() returns false when lives run out."
+        },
+        {
+          "content": "Scripts (steel_streets/scripts/): player.gd (CharacterBody2D; walk/jump/melee attack/ladder climb, knockback and 1.2 s invincibility), enemy_base.gd (CharacterBody2D base with hp, contact damage, score_value, hurtbox/hitbox handling, death), foot_soldier.gd (patrol + chase with ledge detection), shuriken_thrower.gd (paces and fires projectile.tscn every 1.6 s within sight range), boss.gd (state machine PAUSE -> WINDUP -> CHARGE -> RECOVER, emits boss_hp_changed and boss_defeated), projectile.gd, question_block.gd (score + small heal), hud.gd (CanvasLayer hearts/score/lives and boss bar via attach_boss), level_1.gd, anim_util.gd (builds SpriteFrames from horizontal sprite strips via AtlasTexture), and title/splash/game_over/victory screen scripts. Enemies subclass enemy_base.gd via path-based `extends \"res://scripts/enemy_base.gd\"`, not class_name."
+        },
+        {
+          "content": "level_1.gd builds the level procedurally at runtime: a 100x9 grid of 16 px tiles, a TileSet built in code from assets/sprites/tiles/tileset.png, background and foreground painted on a TileMap node (the legacy TileMap class, not TileMapLayer), then ladders, spikes, pickups, foot soldiers, shuriken throwers, the boss (column 92) and the HUD are instanced from constant tables (PLATFORMS, LADDERS, SPIKES, PICKUPS, FOOT_SOLDIERS, SHURIKEN_THROWERS, BOSS_POS). Defeating the boss waits 1.5 s then calls GameManager.goto_victory()."
+        },
+        {
+          "content": "Asset pipeline: tools/gen_assets.py (Python 3 + Pillow + stdlib wave/struct) procedurally generates every PNG sprite sheet (player, enemies, projectiles, tiles, items, UI and bitmap text) from ASCII pixel rows restricted to the 4-color Game Boy palette #e0f8d0 / #88c070 / #346856 / #081820, and every chiptune WAV (square tones, slides, noise bursts, BGM loop). It does NOT compress textures or preprocess external raw art. Regenerate with `python3 steel_streets/tools/gen_assets.py` after `pip install Pillow`; Godot re-imports the outputs (.import files are committed)."
+        }
+      ]
+    },
+    {
+      "title": "Core Layer",
+      "purpose": "Overview of core/: directory layout, singletons registered in register_core_types.cpp, error macros, core_bind.cpp scripting bindings, ProjectSettings/Engine (core/config), OS abstraction, threading primitives (Thread, Mutex, WorkerThreadPool), Input/InputMap and networking (core/io IP, StreamPeer, HTTPClient, PacketPeer).",
+      "parent": null
+    },
+    {
+      "title": "Object Model, ClassDB and GDExtension",
+      "purpose": "Document Object, GDCLASS, ClassDB registration/binding, signals and callables, RefCounted/Ref, ObjectDB, and the GDExtension interface (core/extension) including compatibility validation files in misc/extension_api_validation/.",
+      "parent": "Core Layer"
+    },
+    {
+      "title": "Variant, Strings, Containers and Math",
+      "purpose": "Document Variant types and call dispatch, String/StringName/NodePath, Vector/HashMap/LocalVector/Array/Dictionary/Packed arrays, and the core/math library (vectors, transforms, AABB, geometry, random).",
+      "parent": "Core Layer"
+    },
+    {
+      "title": "Resources, Serialization and File Access",
+      "purpose": "Document Resource, ResourceLoader/ResourceSaver and format loaders, text/binary resource formats, FileAccess/DirAccess, PCK packs, and UID handling.",
+      "parent": "Core Layer"
+    },
+    {
+      "title": "Scene System",
+      "purpose": "Document scene/main: Node lifecycle and notifications, SceneTree, groups, process modes, Viewport/Window, input propagation, PackedScene instancing, and how scene/register_scene_types.cpp registers node types.",
+      "parent": null
+    },
+    {
+      "title": "GUI Framework and Theming",
+      "purpose": "Document Control layout and anchors, focus, containers, buttons, popups, dialogs, item/tree/tab widgets, and the theme system (Theme, ThemeDB, StyleBox, default theme in scene/theme).",
+      "parent": "Scene System"
+    },
+    {
+      "title": "Text Controls",
+      "purpose": "Document Label, LineEdit, TextEdit, CodeEdit (syntax highlighting, folding, completion) and RichTextLabel, and how they use TextServer.",
+      "parent": "Scene System"
+    },
+    {
+      "title": "2D Nodes, TileMaps and Resources",
+      "purpose": "Document scene/2d nodes: Node2D, CanvasItem, sprites and AnimatedSprite2D, cameras, physics bodies and areas, TileMapLayer and legacy TileMap, TileSet, and 2D resources.",
+      "parent": "Scene System",
+      "page_notes": [
+        {
+          "content": "Explain TileMap vs TileMapLayer (TileMap is deprecated in favor of TileMapLayer); the Steel Streets demo still uses the legacy TileMap node."
+        }
+      ]
+    },
+    {
+      "title": "3D Nodes and Resources",
+      "purpose": "Document scene/3d nodes (Node3D, meshes, lights, cameras, physics bodies, skeletons, GPU particles, CSG via modules) and 3D resources (Mesh, Material, Environment, World3D).",
+      "parent": "Scene System"
+    },
+    {
+      "title": "Animation and Tweening",
+      "purpose": "Document AnimationMixer, AnimationPlayer, AnimationTree and blend nodes, Animation resources, and Tween/PropertyTweener.",
+      "parent": "Scene System"
+    },
+    {
+      "title": "Servers Layer",
+      "purpose": "Overview of servers/: server singletons and their registration (register_server_types.cpp), thread-safe wrappers (server_wrap_mt_common.h), DisplayServer and AccessibilityServer, CameraServer, XRServer, movie_writer, and how scene nodes talk to servers via RIDs.",
+      "parent": null
+    },
+    {
+      "title": "Rendering Architecture and Scene Renderers",
+      "purpose": "Document RenderingServer, the renderer_rd scene renderers (Forward+ / Forward Clustered, Mobile), the GLES3 Compatibility renderer, canvas rendering, and environment/post-processing effects.",
+      "parent": "Servers Layer"
+    },
+    {
+      "title": "RenderingDevice, Graphics Drivers and Shaders",
+      "purpose": "Document RenderingDevice and its drivers (drivers/vulkan, drivers/d3d12, drivers/metal), the shader language compiler (servers/rendering/shader_language.cpp), materials/storage, and GLSL builders (glsl_builders.py, gles3_builders.py).",
+      "parent": "Servers Layer"
+    },
+    {
+      "title": "Physics and Navigation Servers",
+      "purpose": "Document PhysicsServer2D/3D, the built-in Godot physics and Jolt module, and NavigationServer2D/3D (servers/navigation_2d, servers/navigation_3d, modules/navigation*).",
+      "parent": "Servers Layer"
+    },
+    {
+      "title": "Audio System",
+      "purpose": "Document AudioServer buses and effects, AudioStream/AudioStreamPlayback, AudioStreamPlayer 2D/3D nodes, WAV/Ogg/MP3 streams, and platform audio drivers.",
+      "parent": "Servers Layer"
+    },
+    {
+      "title": "Text Server and Fonts",
+      "purpose": "Document TextServer interface (servers/text), text_server_adv and text_server_fb modules, shaping/BiDi, Font/FontFile resources and font fallback.",
+      "parent": "Servers Layer"
+    },
+    {
+      "title": "Scripting Languages and GDScript",
+      "purpose": "Document ScriptLanguage/ScriptServer and the GDScript pipeline in modules/gdscript: tokenizer, parser, analyzer, compiler, bytecode VM, warnings and typed instructions.",
+      "parent": null
+    },
+    {
+      "title": "GDScript Editor Tooling and LSP",
+      "purpose": "Document GDScript code completion, highlighting, the language server (modules/gdscript/language_server), and the GDScript test runner with .gd/.out expectation files in modules/gdscript/tests/scripts.",
+      "parent": "Scripting Languages and GDScript"
+    },
+    {
+      "title": "C# / .NET Integration",
+      "purpose": "Document modules/mono: GodotSharp glue generation, source generators, Godot.NET.Sdk, GodotTools editor integration, and building with module_mono_enabled.",
+      "parent": "Scripting Languages and GDScript"
+    },
+    {
+      "title": "Editor",
+      "purpose": "Document the editor/ tree: EditorNode, main screen and docks, EditorInterface, inspector and property editors, scene/script/shader editors and plugins, undo/redo, project manager, and the debugger/profilers (editor/debugger).",
+      "parent": null
+    },
+    {
+      "title": "Asset Import and Export Pipelines",
+      "purpose": "Document editor/import (ResourceImporter implementations, EditorFileSystem scan and reimport) and editor/export (EditorExportPlatform, presets, per-platform exporters).",
+      "parent": "Editor"
+    },
+    {
+      "title": "Platform Ports and Drivers",
+      "purpose": "Document platform/ ports (android, ios, visionos, linuxbsd, macos, web, windows), their OS and DisplayServer implementations, windowing/IME/input handling, and shared drivers/ backends.",
+      "parent": null
+    },
+    {
+      "title": "Modules, XR and Thirdparty Libraries",
+      "purpose": "Document the module system (config.py, SCsub, register_types), notable modules, XR support (modules/openxr, modules/webxr, servers/xr), and vendored thirdparty/ libraries with their versions and patches as recorded in thirdparty/README.md.",
+      "parent": null
+    },
+    {
+      "title": "Development Workflow and CI",
+      "purpose": "Document contributing conventions (CONTRIBUTING.md, clang-format/clang-tidy, ruff, copyright headers), pre-commit hooks, class reference XML in doc/classes and doc/tools (make_rst.py, doc_status.py), and GitHub Actions CI (.github/workflows/runner.yml orchestrating static_checks and per-platform build workflows, reusable actions in .github/actions).",
+      "parent": null,
+      "page_notes": [
+        {
+          "content": "runner.yml runs static checks first and only runs platform builds on pull requests when static checks report sources-changed; describe this gating."
+        }
+      ]
+    },
+    {
+      "title": "Test Suite",
+      "purpose": "Document the doctest-based unit tests in tests/ (test_main.cpp, test_macros.h, core/scene/servers subfolders, display_server_mock), how to build (tests=yes) and run them (--headless --test, --test-case filters), creating tests with tests/create_test.py, module tests, tests/python_build and tests/compatibility_test.",
+      "parent": "Development Workflow and CI"
+    },
+    {
+      "title": "Glossary",
+      "purpose": "Define key Godot and repository-specific terms: SceneTree, Viewport, RID, ClassDB, Variant, GDExtension, RenderingDevice, Forward+, Compatibility renderer, TOOLS_ENABLED, SCU build, PackedScene, TileMapLayer, autoload, GameManager (Steel Streets), gen_assets.py.",
+      "parent": null
+    }
+  ]
+}

@@ -1,0 +1,254 @@
+{
+  "repo_notes": [
+    {
+      "content": "This repository is a fork of godotengine/godot tracking upstream `master` at version 4.7-beta (see `version.py`: major=4, minor=7, status=\"beta\"; upstream commit 6d6e822c68 'Bump version to 4.7-beta'). The only fork-specific addition so far is the `steel_streets/` Godot game project (merged in PR #2). Describe the engine as 4.7-beta, not 4.3/4.5/4.6. `misc/extension_api_validation/4.6-stable/` holds the GDExtension compatibility notes for changes since the last stable release."
+    },
+    {
+      "content": "Team workflow commands (from the repo environment blueprint): build with `scons tests=yes target=editor dev_build=yes -j$(nproc)` (linking needs ~8 GB RAM; swap is configured on dev VMs); run unit tests with `./bin/godot.linuxbsd.editor.dev.x86_64 --headless --test`, filtering with `--test-case=\"*Name*\"`; lint/format via `pre-commit run --files <paths>` using `.pre-commit-config.yaml` (clang-format, clang-tidy, ruff, mypy, codespell, file-format, header-guards, copyright-headers, validate-xml, dotnet-format, etc.). Always include these exact commands where build/test/lint are discussed."
+    },
+    {
+      "content": "Recent architectural changes (Feb-Apr 2026) that pages must reflect: (1) `GDType` (`core/object/gdtype.h/.cpp`) now owns signal and enum registration previously held by `ClassDB`/`ClassInfo`, with caches across supertypes; GDExtension placeholders use the real GDType. (2) New GDExtension interface functions `classdb_construct_object3` and `classdb_register_extension_class6` (refcount-aware construction) and `Variant::get_type_by_name`. (3) Visual shaders live in `modules/visual_shader/` (moved out of scene/ and editor/ into a module with its own `editor/` subfolder and `vs_nodes/`). (4) `AreaLight3D` (`scene/3d/light_3d.h`) with GLES3 support (`drivers/gles3/shaders/area_lights_inc.glsl`) and lightmapper support (`modules/lightmapper_rd/lm_area_lights_inc.glsl`). (5) RenderingDevice raytracing lists (`ID_TYPE_RAYTRACING_LIST`) and refactored raytracing pipelines / multi-geometry BLAS creation. (6) HDR output support on DisplayServer (Wayland, macOS/Apple, Windows; Vulkan on macOS) and `Image.save_exr` HDR screenshots. (7) New texture resources `DPITexture` (`scene/resources/dpi_texture.h`, SVG import) and `DrawableTexture2D` (`scene/resources/drawable_texture_2d.h`). (8) `View3DController` (`scene/debugger/view_3d_controller.h`) shared by the 3D editor viewport and the Game view runtime camera. (9) `Control` gained `custom_maximum_size`, offset transform, `_get_cursor_shape()`; `ScrollContainer` gained `SCROLL_MODE_MAXIMIZE_FIRST`; PopupMenu gained a fuzzy search bar."
+    },
+    {
+      "content": "Directory map reminders: the editor is organized by feature folders (`editor/animation`, `editor/docks`, `editor/inspector`, `editor/scene` (2D/3D/GUI editor plugins and gizmos), `editor/script`, `editor/shader`, `editor/import`, `editor/export`, `editor/run` (game view, embedded process), `editor/debugger`, `editor/settings`, `editor/themes`, `editor/project_manager`). Accessibility is `servers/display/accessibility_server.h` with the AccessKit backend in `drivers/accesskit/` (libs fetched by `misc/scripts/install_accesskit.py`). Game controllers use SDL (`drivers/sdl/joypad_sdl.cpp`). Metal is `drivers/metal/`, D3D12 is `drivers/d3d12/`, Apple platforms share `drivers/apple_embedded/` and `platform/ios` + `platform/visionos`. Navigation is split into `servers/navigation_2d|3d` and `modules/navigation_2d|3d`; physics backends are `modules/godot_physics_2d|3d` and `modules/jolt_physics`. `servers/movie_writer/` implements Movie Maker mode."
+    },
+    {
+      "content": "Scope guidance: `thirdparty/` is vendored upstream code — document which libraries exist and how they are integrated/updated (`thirdparty/README.md`), but do not explain their internals. `doc/classes/*.xml` and `modules/*/doc_classes/*.xml` are the class reference and should be cited as the public API contract. Cite concrete file paths and class names that exist in the repo; do not invent files or pipelines."
+    }
+  ],
+  "pages": [
+    {
+      "title": "Overview",
+      "purpose": "High-level map of the Godot 4.7-beta engine fork: layered architecture (core, scene, servers, modules, platform/drivers, editor), top-level directories, and the fork-specific steel_streets project. End with a concise glossary of key engine terms (SceneTree, Viewport, RID, ClassDB, GDType, GDExtension, RenderingDevice, DisplayServer, PackedScene, TextServer, Forward+/Mobile/Compatibility).",
+      "page_notes": [
+        {
+          "content": "Replaces the former standalone Glossary page; keep the glossary as a table at the bottom of this page."
+        }
+      ]
+    },
+    {
+      "title": "Engine Startup and Main Loop",
+      "purpose": "main/main.cpp setup phases (setup, setup2, start, iteration), server/driver registration order, MainLoop and SceneTree iteration, headless/test entry points.",
+      "parent": "Overview"
+    },
+    {
+      "title": "Building, Testing and Local Workflow",
+      "purpose": "How to build with SCons (SConstruct, methods.py, platform detect.py, SCsub files, key options like target, dev_build, tests, module_*_enabled, scu_build), how the doctest suite in tests/ and GDScript tests in modules/gdscript/tests are organized and run, and how to run pre-commit checks locally.",
+      "parent": "Overview",
+      "page_notes": [
+        {
+          "content": "Merges the old 'Building from Source (SCons)' and 'Test Suite' pages. Include the exact team commands from repo notes and the test binary path bin/godot.linuxbsd.editor.dev.x86_64. Mention tests/display_server_mock.h, tests/signal_watcher.h, tests/test_macros.h and the create_test.py helper."
+        }
+      ]
+    },
+    {
+      "title": "Steel Streets Demo Game",
+      "purpose": "The fork-specific Game Boy style beat-'em-up/platformer project in steel_streets/: project configuration, scene flow, GDScript architecture, and the procedural asset generator.",
+      "parent": "Overview",
+      "page_notes": [
+        {
+          "content": "Base this page ONLY on files under steel_streets/ (README.md, project.godot, scenes/*.tscn, scripts/*.gd, tools/gen_assets.py). The previous version cited GDScript compiler sources and described a texture-compression pipeline that does not exist; do not repeat that."
+        },
+        {
+          "content": "Facts to cover: 160x144 internal viewport scaled to 640x576 with stretch mode 'viewport' and nearest-neighbor filtering (default_texture_filter=0); gl_compatibility renderer; 4-color GB palette #e0f8d0/#88c070/#346856/#081820; `GameManager` autoload (scripts/game_manager.gd) holding lives/score/HP, signals score_changed/lives_changed/hp_changed, and scene transitions goto_title/goto_splash/goto_level/goto_game_over/goto_victory; input actions move_left, move_right, jump, attack, climb_up, climb_down."
+        },
+        {
+          "content": "Scene flow: title_screen -> splash_screen -> level_1 -> game_over or victory -> title. Entities: player.gd, enemy_base.gd with foot_soldier.gd and shuriken_thrower.gd subclasses, boss.gd, projectile.gd, question_block.gd, hud.gd, anim_util.gd."
+        },
+        {
+          "content": "tools/gen_assets.py uses Pillow and the wave module to procedurally generate every PNG sprite (assets/sprites/{player,enemies,items,projectiles,tiles,ui}) and WAV sound (assets/audio) from code; run `python3 steel_streets/tools/gen_assets.py`. Run the game with `godot --path steel_streets` (project declares 4.3 features but runs on this 4.7 build)."
+        }
+      ]
+    },
+    {
+      "title": "Core Layer",
+      "purpose": "Overview of core/ and how core services are registered, plus detailed sections on the OS singleton and platform hooks, threads/mutexes/WorkerThreadPool, Input and InputEvent, controller mappings, and core networking (StreamPeer, PacketPeer, HTTPClient, IP).",
+      "page_notes": [
+        {
+          "content": "Absorbs the former 'Input and Networking' and OS/threading content; give each its own section."
+        }
+      ]
+    },
+    {
+      "title": "Object Model, ClassDB, GDType and GDExtension",
+      "purpose": "Object, RefCounted, ObjectDB, ClassDB method/property binding, GDType as the owner of signals and enums, MethodBind helpers (method_bind_common.h, callable_mp.h), and the GDExtension C interface and API compatibility validation.",
+      "parent": "Core Layer",
+      "page_notes": [
+        {
+          "content": "Explain the ClassDB -> GDType migration and the refcount-aware classdb_construct_object3 / classdb_register_extension_class6 interface functions. Describe misc/extension_api_validation/ and misc/scripts/validate_extension_api.sh and when contributors must add an entry."
+        }
+      ]
+    },
+    {
+      "title": "Variant, Math, Strings and Containers",
+      "purpose": "Variant type system and utility functions, String/StringName/NodePath, containers (Vector, HashMap, LocalVector, Packed arrays, typed Array/Dictionary) and the core/math library.",
+      "parent": "Core Layer"
+    },
+    {
+      "title": "Resources, Serialization and Configuration",
+      "purpose": "Resource, ResourceLoader/Saver and CacheMode, UIDs, text/binary resource formats, FileAccess/DirAccess, PCK packing, ProjectSettings and EngineSettings.",
+      "parent": "Core Layer",
+      "page_notes": [
+        {
+          "content": "Mention that CacheMode was split out of ResourceFormatLoader."
+        }
+      ]
+    },
+    {
+      "title": "Scene System",
+      "purpose": "scene/main: Node lifecycle and notifications, SceneTree, groups, Viewport and Window, PackedScene instancing, and input event propagation."
+    },
+    {
+      "title": "GUI Framework and Theming",
+      "purpose": "Control layout and anchors, containers, text controls (LineEdit, TextEdit, CodeEdit, RichTextLabel), item/tab widgets, buttons, popups and dialogs, Theme/ThemeDB and StyleBoxes, and GUI accessibility hooks.",
+      "parent": "Scene System",
+      "page_notes": [
+        {
+          "content": "Consolidates the former Text Controls; Item, Container and Tab Widgets; Buttons, Popups and Dialogs; and Theming and StyleBoxes pages into sections of one page."
+        },
+        {
+          "content": "Cover new APIs: Control.custom_maximum_size, Control offset transform, _get_cursor_shape(), _get_tooltip_auto_translate_mode_at(), ScrollContainer SCROLL_MODE_MAXIMIZE_FIRST and scroll switch, PopupMenu fuzzy search bar, RichTextLabel triple-click paragraph selection, SplitContainer nested drag intersections."
+        }
+      ]
+    },
+    {
+      "title": "2D Nodes and Resources",
+      "purpose": "Node2D/CanvasItem hierarchy, sprites, TileMapLayer and TileSet, Polygon2D, 2D physics/navigation nodes, particles, and 2D textures including DPITexture and DrawableTexture2D.",
+      "parent": "Scene System"
+    },
+    {
+      "title": "3D Nodes, Lights and Resources",
+      "purpose": "Node3D, MeshInstance3D, lights (including the new AreaLight3D), cameras, GI (VoxelGI, LightmapGI, SDFGI), GPU/CPU particles, skeletons and SkeletonModifier3D/SpringBoneSimulator3D, GridMap, and 3D resources such as meshes and materials.",
+      "parent": "Scene System"
+    },
+    {
+      "title": "Animation and Tweening",
+      "purpose": "AnimationMixer, AnimationPlayer, AnimationTree state machines and blend spaces (including BlendSpace SyncMode), SpriteFrames/AnimatedSprite ping-pong playback, and Tween.",
+      "parent": "Scene System"
+    },
+    {
+      "title": "Servers Layer",
+      "purpose": "Role of servers/ as singletons accessed via RIDs, threading model (server_wrap_mt), and registration in register_server_types.cpp. Summarize rendering, physics, navigation, audio, text, display, XR, camera, and movie_writer servers."
+    },
+    {
+      "title": "Rendering Architecture",
+      "purpose": "RenderingServer API, RenderingServerDefault, scene culling (RendererSceneCull, occlusion, light culler), canvas rendering, viewport rendering, and how renderer backends are selected (Forward+, Mobile, Compatibility).",
+      "parent": "Servers Layer"
+    },
+    {
+      "title": "Scene Renderers and Post-Processing",
+      "purpose": "servers/rendering/renderer_rd forward_clustered and forward_mobile, drivers/gles3 compatibility renderer, environment effects (tonemapping, glow, SSAO/SSIL/SSR, fog, volumetric fog), and HDR output paths.",
+      "parent": "Rendering Architecture",
+      "page_notes": [
+        {
+          "content": "Include AreaLight3D rendering support and HDR output (window HDR support checks, Viewport/DisplayServer HDR settings)."
+        }
+      ]
+    },
+    {
+      "title": "RenderingDevice and Graphics Drivers",
+      "purpose": "RenderingDevice, RenderingDeviceGraph, RenderingDeviceDriver implementations (drivers/vulkan, drivers/d3d12, drivers/metal), shader containers/baking, and raytracing lists/pipelines.",
+      "parent": "Rendering Architecture",
+      "page_notes": [
+        {
+          "content": "Document the ID_TYPE_RAYTRACING_LIST lists and the refactored raytracing pipeline / multi-geometry BLAS APIs."
+        }
+      ]
+    },
+    {
+      "title": "Shaders, Visual Shaders and Materials",
+      "purpose": "Shader language compiler, preprocessor, shader types and warnings, material storage, BaseMaterial3D/ShaderMaterial, and the VisualShader module in modules/visual_shader including its editor plugin.",
+      "parent": "Rendering Architecture",
+      "page_notes": [
+        {
+          "content": "The previous wiki said the Visual Shader module was 'not explicitly shown'; cover modules/visual_shader/visual_shader.h, vs_nodes/, editor/visual_shader_editor_plugin.cpp and how it registers with the shader editor (editor/shader/)."
+        }
+      ]
+    },
+    {
+      "title": "Physics and Navigation Servers",
+      "purpose": "PhysicsServer2D/3D APIs, GodotPhysics and Jolt backends (modules/godot_physics_2d|3d, modules/jolt_physics), and NavigationServer2D/3D split across servers/navigation_2d|3d and modules/navigation_2d|3d.",
+      "parent": "Servers Layer"
+    },
+    {
+      "title": "Audio System and Interactive Music",
+      "purpose": "AudioServer, buses and effects, AudioStream playback, audio drivers, and the interactive_music module (AudioStreamInteractive, AudioStreamPlaylist, AudioStreamSynchronized).",
+      "parent": "Servers Layer"
+    },
+    {
+      "title": "Text Server, Fonts and Accessibility",
+      "purpose": "TextServer interface with text_server_adv (HarfBuzz/ICU) and text_server_fb, font resources and MSDF, plus the AccessibilityServer in servers/display and the AccessKit backend in drivers/accesskit.",
+      "parent": "Servers Layer"
+    },
+    {
+      "title": "XR: OpenXR and WebXR",
+      "purpose": "XRServer and interfaces, the OpenXR module (extensions, action maps, render models, spatial entities) and WebXR, mobile_vr.",
+      "parent": "Servers Layer"
+    },
+    {
+      "title": "GDScript Compiler, VM and Tooling",
+      "purpose": "ScriptServer/ScriptLanguage abstraction and how languages plug in; then GDScript tokenizer, parser, analyzer, compiler and VM, plus editor tooling: code completion (including keyword completion option), declaration/lambda tooltips, warnings, and the language server.",
+      "page_notes": [
+        {
+          "content": "Merges the former 'GDScript Compiler and VM' and 'GDScript Editor Tooling and LSP' pages. Point to modules/gdscript/tests for the test runner."
+        }
+      ]
+    },
+    {
+      "title": "C# / .NET Integration",
+      "purpose": "modules/mono runtime glue, glue/bindings generation, GodotTools editor integration, .NET SDK and MSBuild properties (including the Godot.NET preview property), and the C# source generators.",
+      "page_notes": [
+        {
+          "content": "Merges the former GodotTools and .NET SDK and C# Source Generators pages. Mention the 'Build C# project' command palette entry."
+        }
+      ]
+    },
+    {
+      "title": "Editor",
+      "purpose": "EditorNode, editor shell, main screens, docks, EditorSettings, EditorInterface, undo/redo, inspector and property editors, and how the editor/ folder is organized by feature.",
+      "page_notes": [
+        {
+          "content": "Merges the former Editor Shell/Docks/Settings and Inspector pages. Cover inspector search bars for resource/variant popups, EditorInspectorSection revert button, and checkbox groups."
+        }
+      ]
+    },
+    {
+      "title": "Scene Editors, 3D Viewport and Plugins",
+      "purpose": "EditorPlugin API, 2D/3D/GUI editor plugins under editor/scene, Node3DEditor and View3DController, gizmos, vertex snapping, animation editors, script and shader editors, and the Game view (editor/run).",
+      "parent": "Editor"
+    },
+    {
+      "title": "Asset Import and Export Pipeline",
+      "purpose": "ResourceImporter framework, scene/texture/audio importers (glTF, FBX, DPITexture/SVG), EditorFileSystem, export presets, EditorExportPlatform and export template management.",
+      "parent": "Editor",
+      "page_notes": [
+        {
+          "content": "Merges the former Asset Import Pipeline and Export System pages."
+        }
+      ]
+    },
+    {
+      "title": "Debugger and Profilers",
+      "purpose": "Remote debugger protocol (core/debugger, scene/debugger), editor debugger UI, script/visual/performance profilers, Debug Adapter Protocol, and the ObjectDB profiler module (modules/objectdb_profiler).",
+      "parent": "Editor"
+    },
+    {
+      "title": "Platform Ports and Drivers",
+      "purpose": "Platform ports (linuxbsd, windows, macos, android, ios, visionos, web), DisplayServer implementations and windowing (X11, Wayland, Win32, macOS), HDR/color management, native menus, and drivers (drivers/unix, windows, apple, apple_embedded, sdl, audio backends).",
+      "page_notes": [
+        {
+          "content": "Consolidates the former Display Servers and Windowing, Desktop Platforms, Android Platform, and Web and Apple Embedded Platforms pages as sections. Include Android picture-in-picture (PiP) mode support and Android editor instrumented tests."
+        }
+      ]
+    },
+    {
+      "title": "Development Workflow",
+      "purpose": "Module system (config.py, register_types, modules_builders.py), vendored thirdparty libraries and update policy, CI workflows in .github/workflows (runner.yml orchestration, static_checks.yml, per-platform builds), class reference docs in doc/ and modules/*/doc_classes, code style and pre-commit hooks, CODEOWNERS.",
+      "page_notes": [
+        {
+          "content": "Consolidates the former Modules and Thirdparty, Module System, Vendored Thirdparty Libraries, Continuous Integration, and Documentation and Code Style pages."
+        }
+      ]
+    }
+  ]
+}

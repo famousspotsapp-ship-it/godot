@@ -1,0 +1,187 @@
+{
+  "repo_notes": [
+    {
+      "author": "Korben",
+      "content": "This repository is a fork of godotengine/godot tracking upstream `master`. The engine version is defined in `version.py` (currently 4.7-beta); always derive the engine version from `version.py`, never from demo-project files. References to 'Godot 4.3+' in `steel_streets/README.md` and `steel_streets/project.godot` describe the minimum editor version for that demo game only, not the engine version of this repo. The only fork-specific addition is the top-level `steel_streets/` Godot project (a Game Boy-style GDScript demo game); everything else mirrors upstream, so upstream docs (https://docs.godotengine.org/en/latest) apply."
+    },
+    {
+      "author": "Korben",
+      "content": "Architecture layering to use throughout the wiki: `core/` (Object/ClassDB, Variant, memory, I/O, ProjectSettings, GDExtension interface in `core/extension/`, profiling in `core/profiling/`) -> `servers/` (RenderingServer, RenderingDevice, DisplayServer + AccessibilityServer, physics_2d/3d, navigation_2d/3d, audio, text, xr, camera, movie_writer) -> `scene/` (SceneTree, Node, Viewport/Window, gui, 2d, 3d, animation, resources) -> `editor/`. `drivers/` holds graphics/audio/OS backends (vulkan, d3d12, metal, gles3, accesskit, sdl, alsa/pulseaudio, wasapi, coreaudio). `platform/` holds OS ports: linuxbsd (X11 and Wayland), windows, macos, ios, visionos, android, web. `modules/` holds optional features (gdscript, mono, jolt_physics, godot_physics_2d/3d, navigation_2d/3d, openxr, webxr, gltf, fbx, text_server_adv/fb, lightmapper_rd, multiplayer, etc.). `thirdparty/` is vendored code and should only be described at a high level (see `thirdparty/README.md`), never documented file-by-file."
+    },
+    {
+      "author": "Korben",
+      "content": "Recent upstream changes the wiki must reflect (4.6 -> 4.7 cycle): HDR output support across Windows, macOS (Metal and Vulkan), and Linux Wayland (`display/window/hdr/request_hdr_output` project setting, `DisplayServer.window_is_hdr_output_supported`, HDR luminance APIs, notifications when HDR state changes externally); new rectangular `AreaLight3D` (`scene/3d/light_3d.h`, `LIGHT_AREA`) across renderers; Wayland touch support; reworked export template manager allowing individual template installs and TPZ installs (`editor/export/export_template_manager.*`); the editor Asset Library reworked into the Asset Store and ported to the new store API (`editor/asset_library/`); Perfetto tracing hooks in `core/profiling/` (on by default for Android debug builds); GDExtension additions such as `classdb_register_extension_class6` / `classdb_construct_object3` and `RequiredParam`/`RequiredResult`; new projects default to `canvas_items` stretch mode with `expand` aspect; `Object::is_class` takes `StringName`."
+    },
+    {
+      "author": "Korben",
+      "content": "Developer workflow facts for this team's environment: SCons >= 4.0 and Python >= 3.9 (enforced in `SConstruct`). Standard dev build: `scons tests=yes target=editor dev_build=yes -j$(nproc)` producing `bin/godot.linuxbsd.editor.dev.x86_64`; linking needs roughly 8 GB RAM (swap may be required). Unit tests use doctest under `tests/` and run with `./bin/godot.linuxbsd.editor.dev.x86_64 --headless --test`, filtered with `--test-case=\"*Name*\"`; new test files can be scaffolded with `tests/create_test.py`. Linting/formatting is via pre-commit (`.pre-commit-config.yaml`: clang-format, clang-tidy, ruff, mypy, codespell, dotnet-format, eslint, header-guard/copyright/file-format checks). CI is GitHub Actions: `.github/workflows/runner.yml` runs static_checks then per-platform build workflows. `CONTRIBUTING.md` requires AI agents to self-disclose (robot emoji prefix in PR/issue title plus an AI disclosure note in the description) - document this in the contribution workflow page."
+    }
+  ],
+  "pages": [
+    {
+      "title": "Overview",
+      "purpose": "High-level introduction to the Godot Engine codebase: purpose, engine version (from version.py), directory map (core, servers, scene, editor, drivers, platform, modules, thirdparty, tests, doc, main) and how the layers depend on each other. Mention the fork-specific steel_streets demo project.",
+      "parent": null
+    },
+    {
+      "title": "Building from Source (SCons)",
+      "purpose": "Document SConstruct, methods.py, platform detect.py files, key build options (target, dev_build, tests, precision, module_*_enabled, scu_build, sanitizers, linker), output binary naming, and local build/test commands.",
+      "parent": null,
+      "page_notes": [
+        {
+          "content": "Include the team's standard command `scons tests=yes target=editor dev_build=yes -j$(nproc)` and the ~8 GB link memory requirement."
+        }
+      ]
+    },
+    {
+      "title": "Core Engine",
+      "purpose": "Document core/: Object, ClassDB and method binding, signals, RefCounted, Variant and containers, StringName, memory management, OS/threads/WorkerThreadPool, and main/ startup sequence.",
+      "parent": null
+    },
+    {
+      "title": "Resources, I/O and ProjectSettings",
+      "purpose": "Document Resource loading/saving, ResourceUID, FileAccess/DirAccess, PCK packs, ProjectSettings and core/config.",
+      "parent": "Core Engine"
+    },
+    {
+      "title": "Scene System",
+      "purpose": "Document SceneTree main loop, Node lifecycle and notifications, groups, PackedScene/SceneState serialization and instancing.",
+      "parent": null
+    },
+    {
+      "title": "Node Tree, Viewport and Window",
+      "purpose": "Document Viewport, Window, SubViewport, input propagation, embedded windows, stretch modes (new-project default canvas_items/expand) and HDR-related Window properties.",
+      "parent": "Scene System"
+    },
+    {
+      "title": "GUI Controls and Text",
+      "purpose": "Document Control layout/theme system, containers, PopupMenu, Tree, Label, LineEdit, TextEdit/CodeEdit, RichTextLabel and their interaction with TextServer.",
+      "parent": "Scene System"
+    },
+    {
+      "title": "2D, 3D Nodes and Animation",
+      "purpose": "Document scene/2d and scene/3d node families (cameras, lights incl. AreaLight3D, meshes, GridMap, skeleton modifiers such as SpringBoneSimulator3D) and scene/animation (AnimationPlayer, AnimationTree, blend trees).",
+      "parent": "Scene System"
+    },
+    {
+      "title": "Servers Architecture",
+      "purpose": "Explain the server pattern (RID-based APIs, thread-safe wrappers via server_wrap_mt_common.h, register_server_types) and list every server in servers/.",
+      "parent": null
+    },
+    {
+      "title": "Rendering Architecture",
+      "purpose": "Document RenderingServer, RenderingDevice and its graph, the Forward+ (forward_clustered), Mobile (forward_mobile) and Compatibility (drivers/gles3) renderers, shader language/compiler, and effects.",
+      "parent": "Servers Architecture",
+      "page_notes": [
+        {
+          "content": "Cover AreaLight3D/LIGHT_AREA support and screen-space AA/FSR/MetalFX scaling behavior on Mobile."
+        }
+      ]
+    },
+    {
+      "title": "Graphics Drivers",
+      "purpose": "Document RenderingDeviceDriver backends: Vulkan, D3D12, Metal, plus the GLES3 driver and shader container/baking.",
+      "parent": "Servers Architecture"
+    },
+    {
+      "title": "HDR Output",
+      "purpose": "Document end-to-end HDR output: request_hdr_output project setting, DisplayServer/Window HDR APIs, RenderingDevice SUPPORTS_HDR_OUTPUT feature, and per-platform implementations (Windows, macOS Metal/Vulkan, Wayland) including change notifications.",
+      "parent": "Servers Architecture"
+    },
+    {
+      "title": "Display Server, Input and Accessibility",
+      "purpose": "Document DisplayServer abstraction, windows, IME, native menus, input events and joypads (SDL driver), headless mode, and AccessibilityServer with the AccessKit driver.",
+      "parent": "Servers Architecture"
+    },
+    {
+      "title": "Physics (GodotPhysics and Jolt)",
+      "purpose": "Document PhysicsServer2D/3D APIs, godot_physics_2d/3d modules, the jolt_physics module, physics command queue, and how the engine is selected in project settings.",
+      "parent": "Servers Architecture"
+    },
+    {
+      "title": "Audio, Navigation and XR",
+      "purpose": "Document AudioServer and audio drivers, NavigationServer2D/3D with the navigation_2d/3d modules, and XRServer with openxr/webxr/mobile_vr modules.",
+      "parent": "Servers Architecture"
+    },
+    {
+      "title": "Text Server",
+      "purpose": "Document TextServer API and text_server_adv (HarfBuzz/ICU) vs text_server_fb backends, fonts and shaping.",
+      "parent": "Servers Architecture"
+    },
+    {
+      "title": "Scripting and GDScript",
+      "purpose": "Document the ScriptLanguage/ScriptInstance abstraction and the GDScript module: tokenizer, parser, analyzer, compiler, VM, warnings, and language server.",
+      "parent": null
+    },
+    {
+      "title": "C# / .NET (Mono Module)",
+      "purpose": "Document modules/mono: glue generation, GodotSharp assemblies, build integration and editor support.",
+      "parent": "Scripting and GDScript"
+    },
+    {
+      "title": "GDExtension",
+      "purpose": "Document core/extension: GDExtensionManager, interface headers, extension_api.json dump, class registration versions (e.g. classdb_register_extension_class6), RequiredParam/RequiredResult and compatibility with godot-cpp.",
+      "parent": "Scripting and GDScript"
+    },
+    {
+      "title": "Modules and Third-Party Libraries",
+      "purpose": "Explain the module system (config.py, SCsub, register_types) with a categorized overview of modules/, and summarize vendored libraries in thirdparty/ at a high level.",
+      "parent": null
+    },
+    {
+      "title": "Platform Ports",
+      "purpose": "Document platform/ ports (linuxbsd X11/Wayland, windows, macos, ios, visionos, android, web): OS/DisplayServer implementations, export plugins, and platform-specific build notes.",
+      "parent": null
+    },
+    {
+      "title": "Editor Architecture",
+      "purpose": "Document EditorNode, docks, inspector, undo/redo, EditorSettings, project manager and editor themes.",
+      "parent": null
+    },
+    {
+      "title": "Scene Editors and Plugins",
+      "purpose": "Document EditorPlugin/EditorInterface, 2D/3D viewports, GridMap/TileMap, animation, script and shader editors.",
+      "parent": "Editor Architecture"
+    },
+    {
+      "title": "Import, Export and Asset Store",
+      "purpose": "Document the import pipeline (editor/import, glTF/FBX), export presets and platforms, the reworked export template manager, and the new Asset Store in editor/asset_library.",
+      "parent": "Editor Architecture"
+    },
+    {
+      "title": "Debugger and Profilers",
+      "purpose": "Document script debugger, remote scene tree, visual/frame profilers, ObjectDB profiler and Perfetto tracing hooks in core/profiling.",
+      "parent": "Editor Architecture"
+    },
+    {
+      "title": "Development Workflow",
+      "purpose": "Document how to contribute: branching, PR conventions, CONTRIBUTING.md rules (including the AI-agent self-disclosure requirement), and pre-commit hooks.",
+      "parent": null
+    },
+    {
+      "title": "Test Suite",
+      "purpose": "Document doctest-based tests under tests/, test_main.cpp, test macros, create_test.py, running and filtering tests, and Python build tests in tests/python_build.",
+      "parent": "Development Workflow"
+    },
+    {
+      "title": "CI, Documentation and Code Style",
+      "purpose": "Document GitHub Actions workflows (runner.yml, static_checks, per-platform builds), doc/classes XML class reference and make_rst, clang-format/clang-tidy/ruff style rules.",
+      "parent": "Development Workflow"
+    },
+    {
+      "title": "Steel Streets Demo Game",
+      "purpose": "Document the fork-specific steel_streets/ Godot project: 160x144 Game Boy-style viewport and palette, GameManager autoload, player/enemy/boss scripts, scene flow (splash, title, level, game over, victory), input map, and the tools/gen_assets.py asset generator.",
+      "parent": null,
+      "page_notes": [
+        {
+          "content": "This is a standalone GDScript game project run with `godot --path steel_streets`; it is not part of the engine build."
+        }
+      ]
+    },
+    {
+      "title": "Glossary",
+      "purpose": "Define key engine terms (RID, ClassDB, Variant, SceneTree, Viewport, RenderingDevice, Forward+, GDExtension, AccessKit, HDR output, Jolt, etc.) with links to source locations.",
+      "parent": null
+    }
+  ]
+}
